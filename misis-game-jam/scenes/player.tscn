@@ -13,6 +13,17 @@ offset_right = 80.0
 offset_bottom = 80.0
 color = Color(0.3, 0.7, 1, 1)
 
+[node name="HpLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = -100.0
+offset_top = -155.0
+offset_right = 100.0
+offset_bottom = -125.0
+theme_override_colors/font_color = Color(0.85, 0.95, 0.85, 1)
+theme_override_font_sizes/font_size = 20
+text = "HP 10/10"
+horizontal_alignment = 1
+
 [node name="NameLabel" type="Label" parent="."]
 unique_name_in_owner = true
 offset_left = -100.0

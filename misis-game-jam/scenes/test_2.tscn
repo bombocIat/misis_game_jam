@@ -2,27 +2,39 @@
 
 [ext_resource type="Script" uid="uid://urqv2n3em8q" path="res://scripts/test_2.gd" id="1_test2"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/stats_window.tscn" id="3_stats"]
+[ext_resource type="PackedScene" path="res://scenes/beats_diagram.tscn" id="4_beats"]
+[ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
 
 [node name="Test2" type="Node2D" unique_id=1495433397]
 script = ExtResource("1_test2")
 
 [node name="Background" type="ColorRect" parent="." unique_id=982621707]
-offset_right = 1280.0
-offset_bottom = 720.0
+offset_right = 1600.0
+offset_bottom = 900.0
+mouse_filter = 2
 color = Color(0.08, 0.09, 0.12, 1)
+
+[node name="CardPlayZone" parent="." unique_id=512797668 instance=ExtResource("5_zone")]
+unique_name_in_owner = true
+position = Vector2(800, 400)
+
+[node name="CardHand" type="Node2D" parent="." unique_id=1899112781]
+unique_name_in_owner = true
 
 [node name="Player1" parent="." unique_id=407661494 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(360, 360)
+position = Vector2(380, 420)
 player_name = "Player 1"
 player_color = Color(0.25, 0.65, 1, 1)
 
 [node name="Player2" parent="." unique_id=988606852 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(920, 360)
-player_name = "Player 2"
+position = Vector2(1220, 420)
+player_name = "AI"
 player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true
+input_enabled = false
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=575652674]
 
@@ -30,10 +42,12 @@ is_player_two = true
 unique_name_in_owner = true
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 24.0
-offset_bottom = 80.0
+offset_left = 340.0
+offset_top = 20.0
+offset_right = -340.0
+offset_bottom = 70.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "Pick items, then throw!"
 horizontal_alignment = 1
 
@@ -43,12 +57,22 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -90.0
+offset_top = -70.0
 offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.75, 0.78, 0.85, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "Controls"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BeatsDiagram" parent="UI" unique_id=1135544470 instance=ExtResource("4_beats")]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 316.0
+offset_bottom = 316.0
+
+[node name="StatsWindow" parent="UI" unique_id=336051751 instance=ExtResource("3_stats")]
+unique_name_in_owner = true
