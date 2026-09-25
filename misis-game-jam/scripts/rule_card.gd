@@ -1,16 +1,17 @@
 class_name RuleCard
 extends Area2D
-## Ability card with notebook textures. Special arts: no title, +60px top padding.
+## Ability card with notebook textures. Special arts: no title, top pad.
 
 enum Kind { WIND, DRAGON, HOMEWORK, COOL_ROCK }
 
 const CARD_TYPE_ID := "rule_card"
-const SIZE := Vector2(150, 200)
-const SPECIAL_TOP_PAD := 60.0
-const NORMAL_TOP_PAD := 12.0
-const LABEL_SIDE_PAD := 10.0
+## Base 150×200 scaled +25%.
+const SIZE := Vector2(188, 250)
+const FONT_SIZE := 30
+const SPECIAL_TOP_PAD := 75.0
+const NORMAL_TOP_PAD := 15.0
+const LABEL_SIDE_PAD := 13.0
 
-## Art index 1..4 → texture. Special layout (no title, top pad 60): 1 and 4.
 const ART: Dictionary = {
 	Kind.WIND: {
 		"path": "res://assets/textures/card_1(special).png",
@@ -35,6 +36,7 @@ const ART: Dictionary = {
 @onready var _label: Label = %AbilityLabel
 @onready var _art: TextureRect = %CardArt
 @onready var _draggable: Draggable = %Draggable
+@onready var _collision: CollisionShape2D = $CollisionShape2D
 
 
 func _ready() -> void:
@@ -91,14 +93,14 @@ func apply_to(engine: RuleEngine) -> String:
 				return "Ветер: случайная стрелка развернулась"
 			return "Ветер: нечего менять"
 		Kind.DRAGON:
-			engine.add_beat(RuleEngine.Item.LIZARD, RuleEngine.Item.ROCK)
-			return "Дракон: ящерица теперь бьёт камень"
+			var power: int = engine.add_beat(RuleEngine.Item.LIZARD, RuleEngine.Item.ROCK)
+			return "Дракон: ящерица бьёт камень (урон %d)" % power
 		Kind.HOMEWORK:
-			engine.add_beat(RuleEngine.Item.SCISSORS, RuleEngine.Item.ROCK)
-			return "Классная работа: ножницы теперь бьют камень"
+			var power: int = engine.add_beat(RuleEngine.Item.SCISSORS, RuleEngine.Item.ROCK)
+			return "Классная работа: ножницы бьют камень (урон %d)" % power
 		Kind.COOL_ROCK:
-			engine.add_beat(RuleEngine.Item.ROCK, RuleEngine.Item.PAPER)
-			return "Крутой камень: камень теперь бьёт бумагу"
+			var power: int = engine.add_beat(RuleEngine.Item.ROCK, RuleEngine.Item.PAPER)
+			return "Крутой камень: камень бьёт бумагу (урон %d)" % power
 		_:
 			return ""
 
@@ -106,9 +108,15 @@ func apply_to(engine: RuleEngine) -> String:
 func _apply_visuals() -> void:
 	var def: Dictionary = ART[kind] as Dictionary
 	_art.texture = load(str(def["path"])) as Texture2D
+	_art.offset_left = -SIZE.x * 0.5
+	_art.offset_right = SIZE.x * 0.5
+	_art.offset_top = -SIZE.y * 0.5
+	_art.offset_bottom = SIZE.y * 0.5
+	if _collision.shape is RectangleShape2D:
+		(_collision.shape as RectangleShape2D).size = SIZE
+	_label.add_theme_font_size_override("font_size", FONT_SIZE)
 	_label.text = get_ability_text()
 	var top: float = SPECIAL_TOP_PAD if is_special() else NORMAL_TOP_PAD
-	# Card art centered on Area2D origin; label inset inside the 150×200 rect.
 	_label.offset_left = -SIZE.x * 0.5 + LABEL_SIDE_PAD
 	_label.offset_right = SIZE.x * 0.5 - LABEL_SIDE_PAD
 	_label.offset_top = -SIZE.y * 0.5 + top

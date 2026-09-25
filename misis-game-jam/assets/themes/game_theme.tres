@@ -1,0 +1,16 @@
+[gd_resource type="Theme" format=3 uid="uid://ee5fo7bxatb5"]
+
+[ext_resource type="FontFile" uid="uid://f8psejsgm7ny" path="res://assets/fonts/ofont.ru_July Melt.ttf" id="1_july"]
+
+[resource]
+default_font = ExtResource("1_july")
+default_font_size = 24
+Button/fonts/font = ExtResource("1_july")
+Label/fonts/font = ExtResource("1_july")
+LineEdit/fonts/font = ExtResource("1_july")
+RichTextLabel/fonts/bold_font = ExtResource("1_july")
+RichTextLabel/fonts/bold_italics_font = ExtResource("1_july")
+RichTextLabel/fonts/italics_font = ExtResource("1_july")
+RichTextLabel/fonts/mono_font = ExtResource("1_july")
+RichTextLabel/fonts/normal_font = ExtResource("1_july")
+TextEdit/fonts/font = ExtResource("1_july")

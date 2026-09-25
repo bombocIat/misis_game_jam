@@ -39,10 +39,12 @@ const ITEM_COLORS: Dictionary = {
 
 var _engine: RuleEngine
 var _textures: Dictionary = {}
+var _font: Font
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_font = load("res://assets/fonts/ofont.ru_July Melt.ttf") as Font
 	for item: RuleEngine.Item in ITEMS:
 		_textures[item] = load(str(ITEM_ICONS[item])) as Texture2D
 	if _engine != null:
@@ -80,7 +82,7 @@ func _draw() -> void:
 	for i: int in range(outline.size()):
 		var a: Vector2 = outline[i]
 		var b: Vector2 = outline[(i + 1) % outline.size()]
-		draw_line(a, b, Color(1, 1, 1, 0.12), 2.0)
+		draw_line(a, b, Color(1, 1, 1, 0.45), 2.0)
 
 	# Arrows from undirected pairs: mutual beats → one white double arrow.
 	for i: int in range(ITEMS.size()):
@@ -93,7 +95,7 @@ func _draw() -> void:
 				_draw_double_arrow(
 					positions[a] as Vector2,
 					positions[b] as Vector2,
-					Color(1, 1, 1, 0.95)
+					Color(1, 1, 1, 1)
 				)
 			elif a_beats_b:
 				_draw_arrow(
@@ -111,20 +113,21 @@ func _draw() -> void:
 	# Nodes on top.
 	for item: RuleEngine.Item in ITEMS:
 		var pos: Vector2 = positions[item] as Vector2
-		draw_circle(pos, node_radius, Color(0.12, 0.14, 0.18, 0.95))
+		draw_circle(pos, node_radius, Color(0.12, 0.14, 0.18, 1))
 		draw_arc(pos, node_radius, 0.0, TAU, 32, ITEM_COLORS[item] as Color, 2.5, true)
 		var tex: Texture2D = _textures.get(item) as Texture2D
 		if tex != null:
 			var icon_size := Vector2(36, 36)
 			draw_texture_rect(tex, Rect2(pos - icon_size * 0.5, icon_size), false)
 		else:
+			var font: Font = _font if _font != null else ThemeDB.fallback_font
 			draw_string(
-				ThemeDB.fallback_font,
-				pos + Vector2(-10, 5),
+				font,
+				pos + Vector2(-12, 6),
 				str(ITEM_LABELS[item]),
 				HORIZONTAL_ALIGNMENT_LEFT,
 				-1,
-				16,
+				24,
 				Color.WHITE
 			)
 

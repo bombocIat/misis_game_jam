@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bods1k6u6hj1i"]
 
 [ext_resource type="Script" uid="uid://urqv2n3em8q" path="res://scripts/test_2.gd" id="1_test2"]
+[ext_resource type="Texture2D" uid="uid://bkilbds3bp4mj" path="res://assets/textures/background_1-export.png" id="2_acnpl"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/stats_window.tscn" id="3_stats"]
 [ext_resource type="PackedScene" path="res://scenes/beats_diagram.tscn" id="4_beats"]
@@ -15,6 +16,11 @@ offset_bottom = 900.0
 mouse_filter = 2
 color = Color(0.08, 0.09, 0.12, 1)
 
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=635085303]
+position = Vector2(800, 450)
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("2_acnpl")
+
 [node name="CardPlayZone" parent="." unique_id=512797668 instance=ExtResource("5_zone")]
 unique_name_in_owner = true
 position = Vector2(800, 400)
@@ -24,13 +30,13 @@ unique_name_in_owner = true
 
 [node name="Player1" parent="." unique_id=407661494 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(380, 420)
+position = Vector2(380, 519)
 player_name = "Player 1"
 player_color = Color(0.25, 0.65, 1, 1)
 
 [node name="Player2" parent="." unique_id=988606852 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(1220, 420)
+position = Vector2(1220, 519)
 player_name = "AI"
 player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true
@@ -43,16 +49,17 @@ unique_name_in_owner = true
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 340.0
-offset_top = 20.0
+offset_top = 70.0
 offset_right = -340.0
-offset_bottom = 70.0
+offset_bottom = 142.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 39
 text = "Pick items, then throw!"
 horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="UI" unique_id=827372720]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -61,8 +68,8 @@ offset_top = -70.0
 offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.75, 0.78, 0.85, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.85, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 23
 text = "Controls"
 horizontal_alignment = 1
 vertical_alignment = 1

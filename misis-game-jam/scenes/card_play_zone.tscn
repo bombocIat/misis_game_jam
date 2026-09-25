@@ -26,15 +26,15 @@ offset_top = -110.0
 offset_right = 140.0
 offset_bottom = 110.0
 mouse_filter = 2
-color = Color(1, 1, 1, 0.08)
+color = Color(1, 1, 1, 0.32)
 
 [node name="HintLabel" type="Label" parent="." unique_id=1094985549]
-offset_left = -120.0
-offset_top = -20.0
-offset_right = 120.0
-offset_bottom = 20.0
-theme_override_colors/font_color = Color(1, 1, 1, 0.45)
-theme_override_font_sizes/font_size = 18
+offset_left = -130.0
+offset_top = -28.0
+offset_right = 130.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.95)
+theme_override_font_sizes/font_size = 27
 text = "Сыграть карту"
 horizontal_alignment = 1
 vertical_alignment = 1

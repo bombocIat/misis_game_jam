@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://addons/drag_and_drop/scripts/draggable.gd" id="2_drag"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_card"]
-size = Vector2(150, 200)
+size = Vector2(188, 250)
 
 [node name="RuleCard" type="Area2D"]
 collision_layer = 2
@@ -18,23 +18,23 @@ shape = SubResource("RectangleShape2D_card")
 
 [node name="CardArt" type="TextureRect" parent="."]
 unique_name_in_owner = true
-offset_left = -75.0
-offset_top = -100.0
-offset_right = 75.0
-offset_bottom = 100.0
+offset_left = -94.0
+offset_top = -125.0
+offset_right = 94.0
+offset_bottom = 125.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="AbilityLabel" type="Label" parent="."]
 unique_name_in_owner = true
-offset_left = -65.0
-offset_top = -88.0
-offset_right = 65.0
-offset_bottom = 90.0
+offset_left = -81.0
+offset_top = -110.0
+offset_right = 81.0
+offset_bottom = 112.0
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.08, 0.1, 0.14, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.137, 0.145, 0.38, 1)
+theme_override_font_sizes/font_size = 30
 text = "Ability"
 horizontal_alignment = 1
 vertical_alignment = 1

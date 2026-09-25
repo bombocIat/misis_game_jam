@@ -64,15 +64,15 @@ func _build_rows_if_needed() -> void:
 		row.add_child(icon)
 
 		var name_label := Label.new()
-		name_label.custom_minimum_size = Vector2(90, 0)
+		name_label.custom_minimum_size = Vector2(120, 0)
 		name_label.text = str(ITEM_LABELS[item])
-		name_label.add_theme_font_size_override("font_size", 15)
+		name_label.add_theme_font_size_override("font_size", 23)
 		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(name_label)
 
 		var percent := Label.new()
-		percent.custom_minimum_size = Vector2(110, 0)
-		percent.add_theme_font_size_override("font_size", 15)
+		percent.custom_minimum_size = Vector2(130, 0)
+		percent.add_theme_font_size_override("font_size", 23)
 		percent.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		percent.text = "0% (0/0)"
 		percent.mouse_filter = Control.MOUSE_FILTER_IGNORE

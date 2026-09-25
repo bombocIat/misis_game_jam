@@ -16,16 +16,23 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 run/flush_stdout_on_print=true
 config/icon="res://icon.svg"
 
+[autoload]
+
+DisplayFit="*res://scripts/display_fit.gd"
+
 [display]
 
 window/size/viewport_width=1600
 window/size/viewport_height=900
 window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/drag_and_drop/plugin.cfg")
+
+[gui]
+
+theme/custom="res://assets/themes/game_theme.tres"
 
 [input]
 

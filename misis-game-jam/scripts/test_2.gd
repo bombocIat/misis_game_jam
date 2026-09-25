@@ -3,8 +3,17 @@ extends Node2D
 
 
 const CARD_SCENE: PackedScene = preload("res://scenes/rule_card.tscn")
-const HAND_Y := 780.0
-const HAND_XS: Array[float] = [560.0, 720.0, 880.0, 1040.0]
+const MAX_HAND: int = 3
+const HAND_Y := 760.0
+const HAND_SPACING := 210.0
+const HAND_CENTER_X := 800.0
+
+const ALL_KINDS: Array[RuleCard.Kind] = [
+	RuleCard.Kind.WIND,
+	RuleCard.Kind.DRAGON,
+	RuleCard.Kind.HOMEWORK,
+	RuleCard.Kind.COOL_ROCK,
+]
 
 @onready var player_1: Player = %Player1
 @onready var player_2: Player = %Player2
@@ -37,9 +46,9 @@ func _ready() -> void:
 	stats_window.bind_stats(_stats)
 	beats_diagram.bind_engine(_engine)
 	_setup_play_zone()
-	_spawn_hand()
+	_spawn_starting_hand()
 	hint_label.text = (
-		"Ты: 1–5 предмет, Space = бросок  |  Перетащи карту в центр, чтобы изменить стрелки"
+		"Ты: 1–5 предмет, Space = бросок  |  Карты: макс 3  |  В конце хода +1, за победу ещё +1"
 	)
 	_set_status("Выбери предмет или сыграй карту!")
 
@@ -64,19 +73,53 @@ func _setup_play_zone() -> void:
 	_drop_zone.drop_accepted.connect(_on_card_drop_accepted)
 
 
-func _spawn_hand() -> void:
-	var kinds: Array[RuleCard.Kind] = [
-		RuleCard.Kind.WIND,
-		RuleCard.Kind.DRAGON,
-		RuleCard.Kind.HOMEWORK,
-		RuleCard.Kind.COOL_ROCK,
-	]
-	for i: int in range(kinds.size()):
-		var card: RuleCard = CARD_SCENE.instantiate() as RuleCard
-		card.kind = kinds[i]
-		card_hand.add_child(card)
-		card.position = Vector2(HAND_XS[i], HAND_Y)
-		card.get_node("Draggable").drag_layer_parent = self
+func _spawn_starting_hand() -> void:
+	for _i: int in range(MAX_HAND):
+		_draw_random_card(false)
+	_layout_hand()
+
+
+func _hand_cards() -> Array[RuleCard]:
+	var cards: Array[RuleCard] = []
+	for child: Node in card_hand.get_children():
+		if child is RuleCard and is_instance_valid(child):
+			cards.append(child as RuleCard)
+	return cards
+
+
+func _hand_count() -> int:
+	return _hand_cards().size()
+
+
+func _draw_random_card(relayout: bool = true) -> bool:
+	if _hand_count() >= MAX_HAND:
+		return false
+	var card: RuleCard = CARD_SCENE.instantiate() as RuleCard
+	card.kind = ALL_KINDS[randi() % ALL_KINDS.size()]
+	card_hand.add_child(card)
+	var draggable: Draggable = card.get_node("Draggable") as Draggable
+	draggable.drag_layer_parent = self
+	if relayout:
+		_layout_hand()
+	return true
+
+
+func _grant_end_of_turn_cards(player_won: bool) -> void:
+	# Always +1, and +1 more for a win. Cap at MAX_HAND.
+	_draw_random_card(false)
+	if player_won:
+		_draw_random_card(false)
+	_layout_hand()
+
+
+func _layout_hand() -> void:
+	var cards: Array[RuleCard] = _hand_cards()
+	var n: int = cards.size()
+	if n <= 0:
+		return
+	var start_x: float = HAND_CENTER_X - float(n - 1) * HAND_SPACING * 0.5
+	for i: int in range(n):
+		cards[i].position = Vector2(start_x + float(i) * HAND_SPACING, HAND_Y)
 
 
 func _on_card_drop_accepted(_zone: DropZone, area: Area2D, _plan: DropPlan) -> void:
@@ -89,6 +132,8 @@ func _on_card_drop_accepted(_zone: DropZone, area: Area2D, _plan: DropPlan) -> v
 	await get_tree().create_timer(0.2).timeout
 	if is_instance_valid(card):
 		card.queue_free()
+	await get_tree().process_frame
+	_layout_hand()
 
 
 func _on_player_1_thrown(item: RuleEngine.Item) -> void:
@@ -131,28 +176,38 @@ func _try_resolve() -> void:
 	var right: String = player_2.item_name(_p2_item)
 	match result:
 		1:
-			player_2.take_damage(1)
-			_set_status("%s бьёт %s — ты победил! AI: %d HP" % [left, right, player_2.hp])
+			var dmg: int = _engine.get_damage(_p1_item, _p2_item)
+			player_2.take_damage(dmg)
+			_set_status("%s бьёт %s (−%d) — ты победил! AI: %d HP" % [left, right, dmg, player_2.hp])
 		-1:
-			player_1.take_damage(1)
-			_set_status("%s бьёт %s — AI победил! Ты: %d HP" % [right, left, player_1.hp])
+			var dmg: int = _engine.get_damage(_p2_item, _p1_item)
+			player_1.take_damage(dmg)
+			_set_status("%s бьёт %s (−%d) — AI победил! Ты: %d HP" % [right, left, dmg, player_1.hp])
 		_:
-			player_1.take_damage(1)
-			player_2.take_damage(1)
+			var dmg_to_p1: int = 1
+			var dmg_to_p2: int = 1
 			if (
 				_p1_item != _p2_item
 				and _engine.has_beat(_p1_item, _p2_item)
 				and _engine.has_beat(_p2_item, _p1_item)
 			):
-				_set_status("%s и %s бьют друг друга — оба −1 HP" % [left, right])
+				dmg_to_p2 = _engine.get_damage(_p1_item, _p2_item)
+				dmg_to_p1 = _engine.get_damage(_p2_item, _p1_item)
+				player_1.take_damage(dmg_to_p1)
+				player_2.take_damage(dmg_to_p2)
+				_set_status(
+					"%s (−%d) и %s (−%d) бьют друг друга" % [left, dmg_to_p2, right, dmg_to_p1]
+				)
 			else:
+				player_1.take_damage(dmg_to_p1)
+				player_2.take_damage(dmg_to_p2)
 				_set_status("%s vs %s — ничья, оба −1 HP" % [left, right])
 	print("Round: %s vs %s -> %d | HP %d vs %d" % [left, right, result, player_1.hp, player_2.hp])
 	await get_tree().create_timer(2.0).timeout
 	if not player_1.is_alive() or not player_2.is_alive():
 		_end_match()
 		return
-	_reset_round()
+	_reset_round(result == 1)
 
 
 func _end_match() -> void:
@@ -167,14 +222,15 @@ func _end_match() -> void:
 	_ai_thinking = false
 
 
-func _reset_round() -> void:
+func _reset_round(player_won: bool = false) -> void:
 	_p1_ready = false
 	_p2_ready = false
 	_resolving = false
 	_ai_thinking = false
 	player_1.reset_round()
 	player_2.reset_round()
-	_set_status("Следующий раунд — бросай или сыграй карту!")
+	_grant_end_of_turn_cards(player_won)
+	_set_status("Следующий раунд — бросай или сыграй карту! (карт: %d/%d)" % [_hand_count(), MAX_HAND])
 
 
 func _set_status(text: String) -> void:
