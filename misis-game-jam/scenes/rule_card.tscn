@@ -1,46 +1,47 @@
-[gd_scene format=3 uid="uid://q86pllbnsrsk"]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" uid="uid://o2gwm56vteld" path="res://scripts/rule_card.gd" id="1_card"]
-[ext_resource type="Script" uid="uid://crmnw3ldr3xev" path="res://addons/drag_and_drop/scripts/draggable.gd" id="2_drag"]
-[ext_resource type="Script" uid="uid://djdmnemxrx7bg" path="res://addons/drag_and_drop/resources/draggable_types/draggable_type.gd" id="3_7mh67"]
+[ext_resource type="Script" path="res://scripts/rule_card.gd" id="1_card"]
+[ext_resource type="Script" path="res://addons/drag_and_drop/scripts/draggable.gd" id="2_drag"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_card"]
 size = Vector2(150, 200)
 
-[sub_resource type="Resource" id="Resource_p0wel"]
-script = ExtResource("3_7mh67")
-
-[node name="RuleCard" type="Area2D" unique_id=821773771]
+[node name="RuleCard" type="Area2D"]
 collision_layer = 2
 collision_mask = 2
+monitoring = true
+monitorable = true
 script = ExtResource("1_card")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=680387601]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_card")
 
-[node name="Background" type="ColorRect" parent="." unique_id=888142168]
+[node name="CardArt" type="TextureRect" parent="."]
+unique_name_in_owner = true
 offset_left = -75.0
 offset_top = -100.0
 offset_right = 75.0
 offset_bottom = 100.0
 mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
-[node name="AbilityLabel" type="Label" parent="." unique_id=1647756088]
+[node name="AbilityLabel" type="Label" parent="."]
 unique_name_in_owner = true
-offset_left = -68.0
-offset_top = -90.0
-offset_right = 68.0
+offset_left = -65.0
+offset_top = -88.0
+offset_right = 65.0
 offset_bottom = 90.0
-theme_override_colors/font_color = Color(0.1, 0.1, 0.12, 1)
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.08, 0.1, 0.14, 1)
 theme_override_font_sizes/font_size = 15
 text = "Ability"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="Draggable" type="Node" parent="." unique_id=1457391471]
+[node name="Draggable" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("2_drag")
-dragging_speed = 35.0
 relative_dragging = true
-type = SubResource("Resource_p0wel")
+dragging_speed = 35.0

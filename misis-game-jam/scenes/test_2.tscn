@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/stats_window.tscn" id="3_stats"]
 [ext_resource type="PackedScene" path="res://scenes/beats_diagram.tscn" id="4_beats"]
-[ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
+[ext_resource type="PackedScene" uid="uid://rn17gc8ck2cc" path="res://scenes/card_play_zone.tscn" id="5_zone"]
 
 [node name="Test2" type="Node2D" unique_id=1495433397]
 script = ExtResource("1_test2")

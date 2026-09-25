@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://rn17gc8ck2cc"]
 
-[ext_resource type="Script" path="res://addons/drag_and_drop/scripts/drop_zone.gd" id="1_drop"]
-[ext_resource type="Script" path="res://addons/drag_and_drop/resources/drop_behaviors/drop_behavior_reject.gd" id="2_reject"]
+[ext_resource type="Script" uid="uid://nj1hdjl1vob2" path="res://addons/drag_and_drop/scripts/drop_zone.gd" id="1_drop"]
+[ext_resource type="Script" uid="uid://b5wqxyc42r5u" path="res://addons/drag_and_drop/resources/drop_behaviors/drop_behavior_reject.gd" id="2_reject"]
+[ext_resource type="Script" uid="uid://djdmnemxrx7bg" path="res://addons/drag_and_drop/resources/draggable_types/draggable_type.gd" id="3_dwewb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_zone"]
 size = Vector2(280, 220)
@@ -9,16 +10,17 @@ size = Vector2(280, 220)
 [sub_resource type="Resource" id="Resource_reject"]
 script = ExtResource("2_reject")
 
-[node name="CardPlayZone" type="Area2D"]
+[sub_resource type="Resource" id="Resource_q4si3"]
+script = ExtResource("3_dwewb")
+
+[node name="CardPlayZone" type="Area2D" unique_id=1657449037]
 collision_layer = 2
 collision_mask = 2
-monitoring = true
-monitorable = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1871605860]
 shape = SubResource("RectangleShape2D_zone")
 
-[node name="Hint" type="ColorRect" parent="."]
+[node name="Hint" type="ColorRect" parent="." unique_id=234886646]
 offset_left = -140.0
 offset_top = -110.0
 offset_right = 140.0
@@ -26,19 +28,20 @@ offset_bottom = 110.0
 mouse_filter = 2
 color = Color(1, 1, 1, 0.08)
 
-[node name="HintLabel" type="Label" parent="."]
+[node name="HintLabel" type="Label" parent="." unique_id=1094985549]
 offset_left = -120.0
 offset_top = -20.0
 offset_right = 120.0
 offset_bottom = 20.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.45)
 theme_override_font_sizes/font_size = 18
-text = "Сюда карту"
+text = "Сыграть карту"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DropZone" type="Node2D" parent="."]
+[node name="DropZone" type="Node2D" parent="." unique_id=933505092 node_paths=PackedStringArray("attach_spot")]
 script = ExtResource("1_drop")
-snap_style = 1
+attach_spot = NodePath("..")
 drop_behavior = SubResource("Resource_reject")
+snap_style = 1
+accepted_draggable_types = Array[ExtResource("3_dwewb")]([SubResource("Resource_q4si3")])

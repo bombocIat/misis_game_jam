@@ -4,7 +4,7 @@ extends Node2D
 
 const CARD_SCENE: PackedScene = preload("res://scenes/rule_card.tscn")
 const HAND_Y := 780.0
-const HAND_XS: Array[float] = [620.0, 800.0, 980.0]
+const HAND_XS: Array[float] = [560.0, 720.0, 880.0, 1040.0]
 
 @onready var player_1: Player = %Player1
 @onready var player_2: Player = %Player2
@@ -68,6 +68,7 @@ func _spawn_hand() -> void:
 	var kinds: Array[RuleCard.Kind] = [
 		RuleCard.Kind.WIND,
 		RuleCard.Kind.DRAGON,
+		RuleCard.Kind.HOMEWORK,
 		RuleCard.Kind.COOL_ROCK,
 	]
 	for i: int in range(kinds.size()):
