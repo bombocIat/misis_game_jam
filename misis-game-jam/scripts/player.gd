@@ -76,6 +76,15 @@ func reset_round() -> void:
 	_refresh_choice_ui()
 
 
+func reset_match(enable_input: bool = true) -> void:
+	hp = MAX_HP
+	has_thrown = false
+	selected_item = RuleEngine.Item.ROCK
+	input_enabled = enable_input
+	_refresh_choice_ui()
+	_refresh_hp_ui()
+
+
 func is_alive() -> bool:
 	return hp > 0
 

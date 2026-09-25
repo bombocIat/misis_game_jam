@@ -1,11 +1,11 @@
-[gd_scene format=3 uid="uid://rn17gc8ck2cc"]
+﻿[gd_scene format=3 uid="uid://rn17gc8ck2cc"]
 
 [ext_resource type="Script" uid="uid://nj1hdjl1vob2" path="res://addons/drag_and_drop/scripts/drop_zone.gd" id="1_drop"]
 [ext_resource type="Script" uid="uid://b5wqxyc42r5u" path="res://addons/drag_and_drop/resources/drop_behaviors/drop_behavior_reject.gd" id="2_reject"]
 [ext_resource type="Script" uid="uid://djdmnemxrx7bg" path="res://addons/drag_and_drop/resources/draggable_types/draggable_type.gd" id="3_dwewb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_zone"]
-size = Vector2(280, 220)
+size = Vector2(364, 286)
 
 [sub_resource type="Resource" id="Resource_reject"]
 script = ExtResource("2_reject")
@@ -13,22 +13,24 @@ script = ExtResource("2_reject")
 [sub_resource type="Resource" id="Resource_q4si3"]
 script = ExtResource("3_dwewb")
 
-[node name="CardPlayZone" type="Area2D" unique_id=1657449037]
+[node name="CardPlayZone" type="Area2D"]
 collision_layer = 2
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1871605860]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_zone")
 
-[node name="Hint" type="ColorRect" parent="." unique_id=234886646]
-offset_left = -140.0
-offset_top = -110.0
-offset_right = 140.0
-offset_bottom = 110.0
+[node name="Hint" type="ColorRect" parent="."]
+visible = false
+offset_left = -182.0
+offset_top = -143.0
+offset_right = 182.0
+offset_bottom = 143.0
 mouse_filter = 2
 color = Color(1, 1, 1, 0.32)
 
-[node name="HintLabel" type="Label" parent="." unique_id=1094985549]
+[node name="HintLabel" type="Label" parent="."]
+visible = false
 offset_left = -130.0
 offset_top = -28.0
 offset_right = 130.0
@@ -39,7 +41,7 @@ text = "Сыграть карту"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DropZone" type="Node2D" parent="." unique_id=933505092 node_paths=PackedStringArray("attach_spot")]
+[node name="DropZone" type="Node2D" parent="." node_paths=PackedStringArray("attach_spot")]
 script = ExtResource("1_drop")
 attach_spot = NodePath("..")
 drop_behavior = SubResource("Resource_reject")

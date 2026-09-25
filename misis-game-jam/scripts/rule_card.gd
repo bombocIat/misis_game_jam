@@ -2,7 +2,18 @@ class_name RuleCard
 extends Area2D
 ## Ability card with notebook textures. Special arts: no title, top pad.
 
-enum Kind { WIND, DRAGON, HOMEWORK, COOL_ROCK }
+enum Kind {
+	WIND,
+	DRAGON,
+	HOMEWORK,
+	COOL_ROCK,
+	CHAOS,
+	VULCAN,
+	PAPER_PLANE,
+	MIND_MELD,
+	SANDSTORM,
+	EQUALIZER,
+}
 
 const CARD_TYPE_ID := "rule_card"
 ## Base 150×200 scaled +25%.
@@ -29,6 +40,30 @@ const ART: Dictionary = {
 		"path": "res://assets/textures/card_4.png",
 		"special": true,
 	},
+	Kind.CHAOS: {
+		"path": "res://assets/textures/card_1(special).png",
+		"special": true,
+	},
+	Kind.VULCAN: {
+		"path": "res://assets/textures/card_2.png",
+		"special": false,
+	},
+	Kind.PAPER_PLANE: {
+		"path": "res://assets/textures/card_3(special).png",
+		"special": true,
+	},
+	Kind.MIND_MELD: {
+		"path": "res://assets/textures/card_4.png",
+		"special": true,
+	},
+	Kind.SANDSTORM: {
+		"path": "res://assets/textures/card_2.png",
+		"special": false,
+	},
+	Kind.EQUALIZER: {
+		"path": "res://assets/textures/card_1(special).png",
+		"special": true,
+	},
 }
 
 @export var kind: Kind = Kind.WIND
@@ -52,14 +87,12 @@ func is_special() -> bool:
 
 func get_title() -> String:
 	match kind:
-		Kind.WIND:
-			return ""
 		Kind.DRAGON:
 			return "Дракон, а не ящерица"
-		Kind.HOMEWORK:
-			return ""
-		Kind.COOL_ROCK:
-			return ""
+		Kind.VULCAN:
+			return "Вулканский разум"
+		Kind.SANDSTORM:
+			return "Песчаная буря"
 		_:
 			return ""
 
@@ -74,6 +107,18 @@ func get_ability_body() -> String:
 			return "Ножницы побеждают камень"
 		Kind.COOL_ROCK:
 			return "Камень побеждает бумагу"
+		Kind.CHAOS:
+			return "2 случайные стрелки меняются"
+		Kind.VULCAN:
+			return "Спок побеждает ящерицу"
+		Kind.PAPER_PLANE:
+			return "Бумага побеждает ножницы"
+		Kind.MIND_MELD:
+			return "Спок побеждает бумагу"
+		Kind.SANDSTORM:
+			return "Камень бьёт Спока (+стек)"
+		Kind.EQUALIZER:
+			return "Оба направления: камень↔ножницы"
 		_:
 			return ""
 
@@ -101,6 +146,29 @@ func apply_to(engine: RuleEngine) -> String:
 		Kind.COOL_ROCK:
 			var power: int = engine.add_beat(RuleEngine.Item.ROCK, RuleEngine.Item.PAPER)
 			return "Крутой камень: камень бьёт бумагу (урон %d)" % power
+		Kind.CHAOS:
+			var flips: int = 0
+			if engine.flip_random_arrow():
+				flips += 1
+			if engine.flip_random_arrow():
+				flips += 1
+			return "Хаос: развернуто стрелок — %d" % flips
+		Kind.VULCAN:
+			var power: int = engine.add_beat(RuleEngine.Item.SPOCK, RuleEngine.Item.LIZARD)
+			return "Вулкан: Спок бьёт ящерицу (урон %d)" % power
+		Kind.PAPER_PLANE:
+			var power: int = engine.add_beat(RuleEngine.Item.PAPER, RuleEngine.Item.SCISSORS)
+			return "Бумажный самолётик: бумага бьёт ножницы (урон %d)" % power
+		Kind.MIND_MELD:
+			var power: int = engine.add_beat(RuleEngine.Item.SPOCK, RuleEngine.Item.PAPER)
+			return "Слияние разумов: Спок бьёт бумагу (урон %d)" % power
+		Kind.SANDSTORM:
+			var power: int = engine.add_beat(RuleEngine.Item.ROCK, RuleEngine.Item.SPOCK)
+			return "Песчаная буря: камень бьёт Спока (урон %d)" % power
+		Kind.EQUALIZER:
+			var p1: int = engine.add_beat(RuleEngine.Item.ROCK, RuleEngine.Item.SCISSORS)
+			var p2: int = engine.add_beat(RuleEngine.Item.SCISSORS, RuleEngine.Item.ROCK)
+			return "Уравнитель: камень↔ножницы (урон %d / %d)" % [p1, p2]
 		_:
 			return ""
 

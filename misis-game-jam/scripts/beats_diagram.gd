@@ -19,11 +19,11 @@ const ITEM_LABELS: Dictionary = {
 }
 
 const ITEM_ICONS: Dictionary = {
-	RuleEngine.Item.ROCK: "res://assets/textures/rpsls/rock.svg",
-	RuleEngine.Item.SCISSORS: "res://assets/textures/rpsls/scissors.svg",
-	RuleEngine.Item.PAPER: "res://assets/textures/rpsls/paper.svg",
-	RuleEngine.Item.LIZARD: "res://assets/textures/rpsls/lizard.svg",
-	RuleEngine.Item.SPOCK: "res://assets/textures/rpsls/spock.svg",
+	RuleEngine.Item.ROCK: "res://assets/textures/rpsls/rock.png",
+	RuleEngine.Item.SCISSORS: "res://assets/textures/rpsls/scissors.png",
+	RuleEngine.Item.PAPER: "res://assets/textures/rpsls/paper.png",
+	RuleEngine.Item.LIZARD: "res://assets/textures/rpsls/lizard.png",
+	RuleEngine.Item.SPOCK: "res://assets/textures/rpsls/spock.png",
 }
 
 const ITEM_COLORS: Dictionary = {
@@ -91,33 +91,23 @@ func _draw() -> void:
 			var b: RuleEngine.Item = ITEMS[j]
 			var a_beats_b: bool = _item_beats(a, b)
 			var b_beats_a: bool = _item_beats(b, a)
+			var pos_a: Vector2 = positions[a] as Vector2
+			var pos_b: Vector2 = positions[b] as Vector2
 			if a_beats_b and b_beats_a:
-				_draw_double_arrow(
-					positions[a] as Vector2,
-					positions[b] as Vector2,
-					Color(1, 1, 1, 1)
-				)
+				_draw_double_arrow(pos_a, pos_b, Color(1, 1, 1, 1))
 			elif a_beats_b:
-				_draw_arrow(
-					positions[a] as Vector2,
-					positions[b] as Vector2,
-					ITEM_COLORS[a] as Color
-				)
+				_draw_arrow(pos_a, pos_b, ITEM_COLORS[a] as Color)
 			elif b_beats_a:
-				_draw_arrow(
-					positions[b] as Vector2,
-					positions[a] as Vector2,
-					ITEM_COLORS[b] as Color
-				)
+				_draw_arrow(pos_b, pos_a, ITEM_COLORS[b] as Color)
 
-	# Nodes on top.
+	# Nodes on top of arrows.
 	for item: RuleEngine.Item in ITEMS:
 		var pos: Vector2 = positions[item] as Vector2
 		draw_circle(pos, node_radius, Color(0.12, 0.14, 0.18, 1))
 		draw_arc(pos, node_radius, 0.0, TAU, 32, ITEM_COLORS[item] as Color, 2.5, true)
 		var tex: Texture2D = _textures.get(item) as Texture2D
 		if tex != null:
-			var icon_size := Vector2(36, 36)
+			var icon_size := Vector2(node_radius * 1.35, node_radius * 1.35)
 			draw_texture_rect(tex, Rect2(pos - icon_size * 0.5, icon_size), false)
 		else:
 			var font: Font = _font if _font != null else ThemeDB.fallback_font
@@ -130,6 +120,18 @@ func _draw() -> void:
 				24,
 				Color.WHITE
 			)
+
+	# Damage numbers near defender ends (above nodes).
+	for i: int in range(ITEMS.size()):
+		for j: int in range(i + 1, ITEMS.size()):
+			var a: RuleEngine.Item = ITEMS[i]
+			var b: RuleEngine.Item = ITEMS[j]
+			var pos_a: Vector2 = positions[a] as Vector2
+			var pos_b: Vector2 = positions[b] as Vector2
+			if _item_beats(a, b):
+				_draw_edge_damage(pos_a, pos_b, _engine.get_damage(a, b))
+			if _item_beats(b, a):
+				_draw_edge_damage(pos_b, pos_a, _engine.get_damage(b, a))
 
 
 func _vertex_positions(center: Vector2) -> Dictionary:
@@ -185,3 +187,31 @@ func _draw_arrow_head(tip: Vector2, dir: Vector2, color: Color) -> void:
 	var left: Vector2 = tip - dir.rotated(0.4) * head
 	var right: Vector2 = tip - dir.rotated(-0.4) * head
 	draw_colored_polygon(PackedVector2Array([tip, left, right]), color)
+
+
+## Damage number near the defender end of attacker→defender.
+func _draw_edge_damage(from: Vector2, to: Vector2, damage: int) -> void:
+	if damage <= 0:
+		return
+	var ends: PackedVector2Array = _arrow_ends(from, to)
+	if ends.is_empty():
+		return
+	var start: Vector2 = ends[0]
+	var end: Vector2 = ends[1]
+	var dir: Vector2 = (end - start).normalized()
+	var perp: Vector2 = Vector2(-dir.y, dir.x)
+	# Sit near the defender, slightly off the line so it stays readable.
+	var pos: Vector2 = start.lerp(end, 0.78) + perp * (10.0 + node_radius * 0.08)
+	var font: Font = _font if _font != null else ThemeDB.fallback_font
+	var font_size: int = maxi(18, int(round(node_radius * 0.55)))
+	var text := str(damage)
+	var text_size: Vector2 = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	draw_string(
+		font,
+		pos - text_size * 0.5 + Vector2(0, text_size.y * 0.35),
+		text,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		font_size,
+		Color(1, 0.95, 0.55, 1)
+	)

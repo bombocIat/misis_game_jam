@@ -143,8 +143,10 @@ func _on_input_event(_viewport, event, _shape_idx):
 			a.reparent(get_tree().root)
 		
 		if relative_dragging:
-			drag_offset = a.global_position - event.position
-		
+			drag_offset = a.global_position - a.get_global_mouse_position()
+		else:
+			drag_offset = Vector2.ZERO
+
 		_change_state_to(DRAGGABLE_STATE.DRAGGING)
 		drag_started.emit(a)
 

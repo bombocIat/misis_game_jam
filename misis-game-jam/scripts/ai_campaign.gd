@@ -1,0 +1,64 @@
+class_name AiCampaign
+extends RefCounted
+## Unlock ladder: Хаотик → Каменщик → Ботаник.
+
+
+const SAVE_PATH := "user://ai_campaign.cfg"
+const MAX_TIER := 2
+
+## Highest unlocked opponent index (0..2).
+var unlocked_tier: int = 0
+## Opponent currently fought.
+var current_tier: int = 0
+
+
+func _init() -> void:
+	load_progress()
+
+
+func load_progress() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(SAVE_PATH) != OK:
+		unlocked_tier = 0
+		current_tier = 0
+		return
+	unlocked_tier = clampi(int(cfg.get_value("campaign", "unlocked_tier", 0)), 0, MAX_TIER)
+	current_tier = clampi(int(cfg.get_value("campaign", "current_tier", 0)), 0, unlocked_tier)
+
+
+func save_progress() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("campaign", "unlocked_tier", unlocked_tier)
+	cfg.set_value("campaign", "current_tier", current_tier)
+	cfg.save(SAVE_PATH)
+
+
+func persona_for_tier(tier: int) -> AiOpponent.Persona:
+	match clampi(tier, 0, MAX_TIER):
+		0:
+			return AiOpponent.Persona.CHAOTIC
+		1:
+			return AiOpponent.Persona.MASON
+		_:
+			return AiOpponent.Persona.BOTANIST
+
+
+func name_for_tier(tier: int) -> String:
+	return str(AiOpponent.PERSONA_NAMES[persona_for_tier(tier)])
+
+
+## Call when the player beats the current opponent.
+## Returns true if a new opponent was unlocked.
+func on_player_won() -> bool:
+	var unlocked_new := false
+	if current_tier >= unlocked_tier and unlocked_tier < MAX_TIER:
+		unlocked_tier += 1
+		unlocked_new = true
+	if current_tier < unlocked_tier:
+		current_tier += 1
+	save_progress()
+	return unlocked_new
+
+
+func retry_current() -> void:
+	save_progress()

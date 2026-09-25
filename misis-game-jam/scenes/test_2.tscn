@@ -1,65 +1,69 @@
 [gd_scene format=3 uid="uid://bods1k6u6hj1i"]
 
 [ext_resource type="Script" uid="uid://urqv2n3em8q" path="res://scripts/test_2.gd" id="1_test2"]
-[ext_resource type="Texture2D" uid="uid://bkilbds3bp4mj" path="res://assets/textures/background_1-export.png" id="2_acnpl"]
+[ext_resource type="Texture2D" uid="uid://bkilbds3bp4mj" path="res://assets/textures/background_1-export.png" id="2_bg"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" path="res://scenes/stats_window.tscn" id="3_stats"]
-[ext_resource type="PackedScene" path="res://scenes/beats_diagram.tscn" id="4_beats"]
-[ext_resource type="PackedScene" uid="uid://rn17gc8ck2cc" path="res://scenes/card_play_zone.tscn" id="5_zone"]
+[ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
+[ext_resource type="PackedScene" path="res://scenes/rules_overlay.tscn" id="6_overlay"]
 
-[node name="Test2" type="Node2D" unique_id=1495433397]
+[node name="Test2" type="Node2D" unique_id=1722740620]
 script = ExtResource("1_test2")
 
-[node name="Background" type="ColorRect" parent="." unique_id=982621707]
-offset_right = 1600.0
-offset_bottom = 900.0
+[node name="Background" type="ColorRect" parent="." unique_id=360545446]
+offset_right = 1920.0
+offset_bottom = 1080.0
 mouse_filter = 2
-color = Color(0.08, 0.09, 0.12, 1)
+color = Color(0.06, 0.07, 0.08, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=635085303]
-position = Vector2(800, 450)
-scale = Vector2(1.25, 1.25)
-texture = ExtResource("2_acnpl")
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1930411334]
+position = Vector2(960, 540)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_bg")
 
-[node name="CardPlayZone" parent="." unique_id=512797668 instance=ExtResource("5_zone")]
+[node name="BgDarken" type="ColorRect" parent="." unique_id=1883844754]
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.28)
+
+[node name="CardPlayZone" parent="." unique_id=1147152311 instance=ExtResource("5_zone")]
 unique_name_in_owner = true
-position = Vector2(800, 400)
+position = Vector2(960, 480)
 
-[node name="CardHand" type="Node2D" parent="." unique_id=1899112781]
+[node name="Player1" parent="." unique_id=1625130299 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-
-[node name="Player1" parent="." unique_id=407661494 instance=ExtResource("2_player")]
-unique_name_in_owner = true
-position = Vector2(380, 519)
+position = Vector2(420, 620)
 player_name = "Player 1"
 player_color = Color(0.25, 0.65, 1, 1)
 
-[node name="Player2" parent="." unique_id=988606852 instance=ExtResource("2_player")]
+[node name="CardHand" type="Node2D" parent="." unique_id=570099846]
 unique_name_in_owner = true
-position = Vector2(1220, 519)
+
+[node name="Player2" parent="." unique_id=90572012 instance=ExtResource("2_player")]
+unique_name_in_owner = true
+position = Vector2(1500, 580)
 player_name = "AI"
 player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true
 input_enabled = false
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=575652674]
+[node name="UI" type="CanvasLayer" parent="." unique_id=709694029]
 
-[node name="StatusLabel" type="Label" parent="UI" unique_id=39756411]
+[node name="StatusLabel" type="Label" parent="UI" unique_id=1896408721]
 unique_name_in_owner = true
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 340.0
-offset_top = 70.0
-offset_right = -340.0
-offset_bottom = 142.0
+offset_left = 400.0
+offset_top = 40.0
+offset_right = -400.0
+offset_bottom = 120.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 39
 text = "Pick items, then throw!"
 horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="UI" unique_id=827372720]
+[node name="HintLabel" type="Label" parent="UI" unique_id=186845404]
 unique_name_in_owner = true
-visible = false
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -74,12 +78,5 @@ text = "Controls"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BeatsDiagram" parent="UI" unique_id=1135544470 instance=ExtResource("4_beats")]
-unique_name_in_owner = true
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 316.0
-offset_bottom = 316.0
-
-[node name="StatsWindow" parent="UI" unique_id=336051751 instance=ExtResource("3_stats")]
+[node name="RulesOverlay" parent="UI" unique_id=2067982090 instance=ExtResource("6_overlay")]
 unique_name_in_owner = true

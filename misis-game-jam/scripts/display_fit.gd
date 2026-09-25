@@ -1,7 +1,7 @@
 extends Node
-## Fixed 16:9 design (1600×900). Opens the largest 16:9 window that fits the screen.
+## Fixed 16:9 design (1920×1080). Opens the largest 16:9 window that fits the screen.
 
-const DESIGN := Vector2i(1600, 900)
+const DESIGN := Vector2i(1920, 1080)
 const ASPECT := 16.0 / 9.0
 
 var size: Vector2i = DESIGN
