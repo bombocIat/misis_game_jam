@@ -3,12 +3,12 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://dgn0dhqwtbb7b"
-path="res://.godot/imported/CUPE_1.ttf-44cef479814d000fae21fbead6d50a49.fontdata"
+path="res://.godot/imported/CUPE_1.ttf-ba655576e349b8d1f32be40a7978fd11.fontdata"
 
 [deps]
 
-source_file="res://assets/CUPE_1.ttf"
-dest_files=["res://.godot/imported/CUPE_1.ttf-44cef479814d000fae21fbead6d50a49.fontdata"]
+source_file="res://assets/fonts/CUPE_1.ttf"
+dest_files=["res://.godot/imported/CUPE_1.ttf-ba655576e349b8d1f32be40a7978fd11.fontdata"]
 
 [params]
 

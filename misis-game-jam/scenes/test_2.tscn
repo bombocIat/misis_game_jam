@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://bods1k6u6hj1i"]
+
+[ext_resource type="Script" uid="uid://urqv2n3em8q" path="res://scripts/test_2.gd" id="1_test2"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+
+[node name="Test2" type="Node2D" unique_id=1495433397]
+script = ExtResource("1_test2")
+
+[node name="Background" type="ColorRect" parent="." unique_id=982621707]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.08, 0.09, 0.12, 1)
+
+[node name="Player1" parent="." unique_id=407661494 instance=ExtResource("2_player")]
+unique_name_in_owner = true
+position = Vector2(360, 360)
+player_name = "Player 1"
+player_color = Color(0.25, 0.65, 1, 1)
+
+[node name="Player2" parent="." unique_id=988606852 instance=ExtResource("2_player")]
+unique_name_in_owner = true
+position = Vector2(920, 360)
+player_name = "Player 2"
+player_color = Color(1, 0.4, 0.35, 1)
+is_player_two = true
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=575652674]
+
+[node name="StatusLabel" type="Label" parent="UI" unique_id=39756411]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 24.0
+offset_bottom = 80.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+text = "Pick items, then throw!"
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="UI" unique_id=827372720]
+unique_name_in_owner = true
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -90.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.75, 0.78, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+text = "Controls"
+horizontal_alignment = 1
+vertical_alignment = 1

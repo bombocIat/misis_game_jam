@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dk61ojrb8x30b"]
+
+[ext_resource type="Script" uid="uid://i5bvbgivv7aa" path="res://scripts/test_rule_engine.gd" id="1_sqdt4"]
+
+[node name="Node2D" type="Node2D" unique_id=1859277904]
+script = ExtResource("1_sqdt4")

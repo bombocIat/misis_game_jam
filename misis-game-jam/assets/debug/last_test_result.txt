@@ -1,0 +1,28 @@
+=== RuleEngine test started ===
+OK   ROCK vs ROCK -> 0
+OK   ROCK vs SCISSORS -> 1
+OK   ROCK vs PAPER -> -1
+OK   ROCK vs LIZARD -> 1
+OK   ROCK vs SPOCK -> -1
+OK   SCISSORS vs ROCK -> -1
+OK   SCISSORS vs SCISSORS -> 0
+OK   SCISSORS vs PAPER -> 1
+OK   SCISSORS vs LIZARD -> 1
+OK   SCISSORS vs SPOCK -> -1
+OK   PAPER vs ROCK -> 1
+OK   PAPER vs SCISSORS -> -1
+OK   PAPER vs PAPER -> 0
+OK   PAPER vs LIZARD -> -1
+OK   PAPER vs SPOCK -> 1
+OK   LIZARD vs ROCK -> -1
+OK   LIZARD vs SCISSORS -> -1
+OK   LIZARD vs PAPER -> 1
+OK   LIZARD vs LIZARD -> 0
+OK   LIZARD vs SPOCK -> 1
+OK   SPOCK vs ROCK -> 1
+OK   SPOCK vs SCISSORS -> 1
+OK   SPOCK vs PAPER -> -1
+OK   SPOCK vs LIZARD -> -1
+OK   SPOCK vs SPOCK -> 0
+PASS: all 25 pairs match classic RPSLS
+=== RuleEngine test finished ===

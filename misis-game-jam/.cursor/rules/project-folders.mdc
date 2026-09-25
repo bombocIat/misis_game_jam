@@ -1,0 +1,22 @@
+---
+description: Keep scripts, scenes, and assets in separate folders
+alwaysApply: true
+---
+
+# Project folders
+
+```
+res://
+  scripts/   # all .gd (game + tests)
+  scenes/    # all .tscn
+  assets/    # art, audio, fonts, debug dumps
+    fonts/
+    textures/
+    debug/
+  addons/    # plugins only
+```
+
+- Never put `.gd` next to `.tscn` in the same feature folder
+- Scenes reference scripts via `res://scripts/...`
+- Do not add `actors/`, `tests/` as top-level mixed folders
+---
