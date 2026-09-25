@@ -7,6 +7,7 @@ const MAX_HAND: int = 3
 const HAND_Y := 912.0
 const HAND_SPACING := 250.0
 const HAND_CENTER_X := 960.0
+const STACK_STEP := Vector2(14.0, -12.0)
 
 const ALL_KINDS: Array[RuleCard.Kind] = [
 	RuleCard.Kind.WIND,
@@ -27,6 +28,7 @@ const ALL_KINDS: Array[RuleCard.Kind] = [
 @onready var hint_label: Label = %HintLabel
 @onready var rules_overlay: RulesOverlay = %RulesOverlay
 @onready var card_play_zone: Area2D = %CardPlayZone
+@onready var card_discard_zone: Area2D = %CardDiscardZone
 @onready var card_hand: Node2D = %CardHand
 
 var _engine: RuleEngine = RuleEngine.new()
@@ -40,7 +42,9 @@ var _p2_item: RuleEngine.Item = RuleEngine.Item.ROCK
 var _resolving: bool = false
 var _ai_thinking: bool = false
 var _drop_zone: DropZone
+var _discard_drop_zone: DropZone
 var _match_over: bool = false
+var _play_stack_count: int = 0
 
 
 func _ready() -> void:
@@ -50,9 +54,10 @@ func _ready() -> void:
 	player_2.input_enabled = false
 	rules_overlay.bind(_engine, _stats)
 	_setup_play_zone()
+	_setup_discard_zone()
 	_start_match(_campaign.current_tier, false)
 	hint_label.text = (
-		"1–5 предмет, Space = бросок  |  Tab = правила  |  Карты: макс 3  |  R = реванш"
+		"1–5 / Space  |  Tab = правила  |  Карты в центр = играть, в корзину = сброс  |  R = реванш"
 	)
 
 
@@ -77,15 +82,28 @@ func _ensure_drag_input() -> void:
 	InputMap.action_add_event(&"draggable_click", mouse)
 
 
-func _setup_play_zone() -> void:
-	_drop_zone = card_play_zone.get_node("DropZone") as DropZone
+func _make_card_type_list() -> Array[DraggableType]:
 	var accepted := DraggableType.new()
 	accepted.id = RuleCard.CARD_TYPE_ID
 	var accepted_list: Array[DraggableType] = []
 	accepted_list.append(accepted)
-	_drop_zone.accepted_draggable_types = accepted_list
+	return accepted_list
+
+
+func _setup_play_zone() -> void:
+	_drop_zone = card_play_zone.get_node("DropZone") as DropZone
+	_drop_zone.accepted_draggable_types = _make_card_type_list()
 	_drop_zone.snap_style = DropZone.SNAP_STYLE.SNAP_CENTER
-	_drop_zone.drop_accepted.connect(_on_card_drop_accepted)
+	_drop_zone.drop_behavior = DropBehaviorStack.new()
+	_drop_zone.drop_applied.connect(_on_play_drop_applied)
+
+
+func _setup_discard_zone() -> void:
+	_discard_drop_zone = card_discard_zone.get_node("DropZone") as DropZone
+	_discard_drop_zone.accepted_draggable_types = _make_card_type_list()
+	_discard_drop_zone.snap_style = DropZone.SNAP_STYLE.SNAP_CENTER
+	_discard_drop_zone.drop_behavior = DropBehaviorStack.new()
+	_discard_drop_zone.drop_accepted.connect(_on_discard_drop_accepted)
 
 
 func _start_match(tier: int, is_retry: bool) -> void:
@@ -97,6 +115,7 @@ func _start_match(tier: int, is_retry: bool) -> void:
 	rules_overlay.bind(_engine, _stats)
 	_clear_hand()
 	_clear_played_cards()
+	_play_stack_count = 0
 	player_1.reset_match(true)
 	player_2.reset_match(false)
 	player_2.player_name = _ai.get_display_name()
@@ -176,16 +195,43 @@ func _layout_hand() -> void:
 		cards[i].position = Vector2(start_x + float(i) * HAND_SPACING, HAND_Y)
 
 
-func _on_card_drop_accepted(_zone: DropZone, area: Area2D, _plan: DropPlan) -> void:
+func _on_play_drop_applied(_zone: DropZone, area: Area2D, _plan: DropPlan) -> void:
 	if _match_over:
 		return
 	var card: RuleCard = area as RuleCard
-	if card == null:
+	if card == null or card.resolved:
 		return
 	var message: String = card.apply_to(_engine)
 	_set_status(message)
 	print(message)
-	await get_tree().create_timer(0.2).timeout
+	_play_stack_count += 1
+	card.z_index = _play_stack_count
+	card.mark_resolved()
+	_layout_hand()
+	_settle_stacked_card(card, _play_stack_count - 1)
+
+
+func _settle_stacked_card(card: RuleCard, stack_index: int) -> void:
+	await get_tree().create_timer(0.28).timeout
+	if not is_instance_valid(card):
+		return
+	card.position = STACK_STEP * float(stack_index)
+	var drag: Draggable = card.get_node_or_null("Draggable") as Draggable
+	if drag != null:
+		drag.next_position = card.global_position
+		drag.previous_position = card.global_position
+		drag.state = Draggable.DRAGGABLE_STATE.IDLE
+
+
+func _on_discard_drop_accepted(_zone: DropZone, area: Area2D, _plan: DropPlan) -> void:
+	if _match_over:
+		return
+	var card: RuleCard = area as RuleCard
+	if card == null or card.resolved:
+		return
+	card.mark_resolved()
+	_set_status("Карта сброшена (без эффекта)")
+	await get_tree().create_timer(0.15).timeout
 	if is_instance_valid(card):
 		card.queue_free()
 	await get_tree().process_frame

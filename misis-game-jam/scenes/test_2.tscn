@@ -5,41 +5,46 @@
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
 [ext_resource type="PackedScene" path="res://scenes/rules_overlay.tscn" id="6_overlay"]
+[ext_resource type="PackedScene" path="res://scenes/card_discard_zone.tscn" id="7_discard"]
 
-[node name="Test2" type="Node2D" unique_id=1722740620]
+[node name="Test2" type="Node2D" unique_id=241795487]
 script = ExtResource("1_test2")
 
-[node name="Background" type="ColorRect" parent="." unique_id=360545446]
+[node name="Background" type="ColorRect" parent="." unique_id=598281078]
 offset_right = 1920.0
 offset_bottom = 1080.0
 mouse_filter = 2
 color = Color(0.06, 0.07, 0.08, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1930411334]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2077988694]
 position = Vector2(960, 540)
 scale = Vector2(1.5, 1.5)
 texture = ExtResource("2_bg")
 
-[node name="BgDarken" type="ColorRect" parent="." unique_id=1883844754]
+[node name="BgDarken" type="ColorRect" parent="." unique_id=121152045]
 offset_right = 1920.0
 offset_bottom = 1080.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.28)
 
-[node name="CardPlayZone" parent="." unique_id=1147152311 instance=ExtResource("5_zone")]
+[node name="CardPlayZone" parent="." unique_id=1826448262 instance=ExtResource("5_zone")]
 unique_name_in_owner = true
 position = Vector2(960, 480)
 
-[node name="Player1" parent="." unique_id=1625130299 instance=ExtResource("2_player")]
+[node name="CardDiscardZone" parent="." unique_id=906822414 instance=ExtResource("7_discard")]
+unique_name_in_owner = true
+position = Vector2(1760, 900)
+
+[node name="CardHand" type="Node2D" parent="." unique_id=1968767669]
+unique_name_in_owner = true
+
+[node name="Player1" parent="." unique_id=1303302973 instance=ExtResource("2_player")]
 unique_name_in_owner = true
 position = Vector2(420, 620)
 player_name = "Player 1"
 player_color = Color(0.25, 0.65, 1, 1)
 
-[node name="CardHand" type="Node2D" parent="." unique_id=570099846]
-unique_name_in_owner = true
-
-[node name="Player2" parent="." unique_id=90572012 instance=ExtResource("2_player")]
+[node name="Player2" parent="." unique_id=110631946 instance=ExtResource("2_player")]
 unique_name_in_owner = true
 position = Vector2(1500, 580)
 player_name = "AI"
@@ -47,9 +52,9 @@ player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true
 input_enabled = false
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=709694029]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1988716976]
 
-[node name="StatusLabel" type="Label" parent="UI" unique_id=1896408721]
+[node name="StatusLabel" type="Label" parent="UI" unique_id=338989002]
 unique_name_in_owner = true
 anchors_preset = 10
 anchor_right = 1.0
@@ -62,7 +67,7 @@ theme_override_font_sizes/font_size = 39
 text = "Pick items, then throw!"
 horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="UI" unique_id=186845404]
+[node name="HintLabel" type="Label" parent="UI" unique_id=386323405]
 unique_name_in_owner = true
 anchors_preset = 12
 anchor_top = 1.0
@@ -78,5 +83,5 @@ text = "Controls"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RulesOverlay" parent="UI" unique_id=2067982090 instance=ExtResource("6_overlay")]
+[node name="RulesOverlay" parent="UI" unique_id=888753658 instance=ExtResource("6_overlay")]
 unique_name_in_owner = true

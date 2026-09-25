@@ -1,14 +1,14 @@
 ﻿[gd_scene format=3 uid="uid://rn17gc8ck2cc"]
 
 [ext_resource type="Script" uid="uid://nj1hdjl1vob2" path="res://addons/drag_and_drop/scripts/drop_zone.gd" id="1_drop"]
-[ext_resource type="Script" uid="uid://b5wqxyc42r5u" path="res://addons/drag_and_drop/resources/drop_behaviors/drop_behavior_reject.gd" id="2_reject"]
+[ext_resource type="Script" path="res://scripts/drop_behavior_stack.gd" id="2_stack"]
 [ext_resource type="Script" uid="uid://djdmnemxrx7bg" path="res://addons/drag_and_drop/resources/draggable_types/draggable_type.gd" id="3_dwewb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_zone"]
 size = Vector2(364, 286)
 
-[sub_resource type="Resource" id="Resource_reject"]
-script = ExtResource("2_reject")
+[sub_resource type="Resource" id="Resource_stack"]
+script = ExtResource("2_stack")
 
 [sub_resource type="Resource" id="Resource_q4si3"]
 script = ExtResource("3_dwewb")
@@ -44,6 +44,6 @@ vertical_alignment = 1
 [node name="DropZone" type="Node2D" parent="." node_paths=PackedStringArray("attach_spot")]
 script = ExtResource("1_drop")
 attach_spot = NodePath("..")
-drop_behavior = SubResource("Resource_reject")
+drop_behavior = SubResource("Resource_stack")
 snap_style = 1
 accepted_draggable_types = Array[ExtResource("3_dwewb")]([SubResource("Resource_q4si3")])

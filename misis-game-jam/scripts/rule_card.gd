@@ -68,6 +68,8 @@ const ART: Dictionary = {
 
 @export var kind: Kind = Kind.WIND
 
+var resolved: bool = false
+
 @onready var _label: Label = %AbilityLabel
 @onready var _art: TextureRect = %CardArt
 @onready var _draggable: Draggable = %Draggable
@@ -79,6 +81,17 @@ func _ready() -> void:
 	_apply_visuals()
 	monitoring = true
 	monitorable = true
+
+
+func mark_resolved() -> void:
+	resolved = true
+	input_pickable = false
+	collision_layer = 0
+	collision_mask = 0
+	monitoring = false
+	monitorable = false
+	if _draggable != null:
+		_draggable.set_process(false)
 
 
 func is_special() -> bool:
