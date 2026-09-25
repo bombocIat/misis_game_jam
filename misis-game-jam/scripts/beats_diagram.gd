@@ -121,7 +121,7 @@ func _draw() -> void:
 				Color.WHITE
 			)
 
-	# Damage numbers near defender ends (above nodes).
+	# Damage numbers beside arrows, outside toward the rim.
 	for i: int in range(ITEMS.size()):
 		for j: int in range(i + 1, ITEMS.size()):
 			var a: RuleEngine.Item = ITEMS[i]
@@ -129,9 +129,9 @@ func _draw() -> void:
 			var pos_a: Vector2 = positions[a] as Vector2
 			var pos_b: Vector2 = positions[b] as Vector2
 			if _item_beats(a, b):
-				_draw_edge_damage(pos_a, pos_b, _engine.get_damage(a, b))
+				_draw_edge_damage(pos_a, pos_b, _engine.get_damage(a, b), center)
 			if _item_beats(b, a):
-				_draw_edge_damage(pos_b, pos_a, _engine.get_damage(b, a))
+				_draw_edge_damage(pos_b, pos_a, _engine.get_damage(b, a), center)
 
 
 func _vertex_positions(center: Vector2) -> Dictionary:
@@ -189,8 +189,8 @@ func _draw_arrow_head(tip: Vector2, dir: Vector2, color: Color) -> void:
 	draw_colored_polygon(PackedVector2Array([tip, left, right]), color)
 
 
-## Damage number near the defender end of attacker→defender.
-func _draw_edge_damage(from: Vector2, to: Vector2, damage: int) -> void:
+## Damage number beside the arrow near the defender, outward from center.
+func _draw_edge_damage(from: Vector2, to: Vector2, damage: int, center: Vector2) -> void:
 	if damage <= 0:
 		return
 	var ends: PackedVector2Array = _arrow_ends(from, to)
@@ -200,8 +200,15 @@ func _draw_edge_damage(from: Vector2, to: Vector2, damage: int) -> void:
 	var end: Vector2 = ends[1]
 	var dir: Vector2 = (end - start).normalized()
 	var perp: Vector2 = Vector2(-dir.y, dir.x)
-	# Sit near the defender, slightly off the line so it stays readable.
-	var pos: Vector2 = start.lerp(end, 0.78) + perp * (10.0 + node_radius * 0.08)
+	var mid: Vector2 = start.lerp(end, 0.5)
+	# Side farther from diagram center = outside the chord.
+	var outward: Vector2 = perp
+	if (mid + perp).distance_squared_to(center) < (mid - perp).distance_squared_to(center):
+		outward = -perp
+	# Near defender tip (along arrow only), side offset unchanged.
+	var along: Vector2 = start.lerp(end, 0.88)
+	var side_pad: float = 14.0 + node_radius * 0.2
+	var pos: Vector2 = along + outward * side_pad
 	var font: Font = _font if _font != null else ThemeDB.fallback_font
 	var font_size: int = maxi(18, int(round(node_radius * 0.55)))
 	var text := str(damage)
