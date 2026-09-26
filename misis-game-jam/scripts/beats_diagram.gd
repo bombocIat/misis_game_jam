@@ -18,12 +18,18 @@ const ITEM_LABELS: Dictionary = {
 	RuleEngine.Item.SPOCK: "Sp",
 }
 
+const TEX_ROCK: Texture2D = preload("res://assets/textures/rpsls/rock.png")
+const TEX_SCISSORS: Texture2D = preload("res://assets/textures/rpsls/scissors.png")
+const TEX_PAPER: Texture2D = preload("res://assets/textures/rpsls/paper.png")
+const TEX_LIZARD: Texture2D = preload("res://assets/textures/rpsls/lizard.png")
+const TEX_SPOCK: Texture2D = preload("res://assets/textures/rpsls/spock.png")
+
 const ITEM_ICONS: Dictionary = {
-	RuleEngine.Item.ROCK: "res://assets/textures/rpsls/rock.png",
-	RuleEngine.Item.SCISSORS: "res://assets/textures/rpsls/scissors.png",
-	RuleEngine.Item.PAPER: "res://assets/textures/rpsls/paper.png",
-	RuleEngine.Item.LIZARD: "res://assets/textures/rpsls/lizard.png",
-	RuleEngine.Item.SPOCK: "res://assets/textures/rpsls/spock.png",
+	RuleEngine.Item.ROCK: TEX_ROCK,
+	RuleEngine.Item.SCISSORS: TEX_SCISSORS,
+	RuleEngine.Item.PAPER: TEX_PAPER,
+	RuleEngine.Item.LIZARD: TEX_LIZARD,
+	RuleEngine.Item.SPOCK: TEX_SPOCK,
 }
 
 const ITEM_COLORS: Dictionary = {
@@ -46,7 +52,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = load("res://assets/fonts/ofont.ru_July Melt.ttf") as Font
 	for item: RuleEngine.Item in ITEMS:
-		_textures[item] = load(str(ITEM_ICONS[item])) as Texture2D
+		_textures[item as int] = ITEM_ICONS[item] as Texture2D
 	if _engine != null:
 		bind_engine(_engine)
 
@@ -105,7 +111,7 @@ func _draw() -> void:
 		var pos: Vector2 = positions[item] as Vector2
 		draw_circle(pos, node_radius, Color(0.12, 0.14, 0.18, 1))
 		draw_arc(pos, node_radius, 0.0, TAU, 32, ITEM_COLORS[item] as Color, 2.5, true)
-		var tex: Texture2D = _textures.get(item) as Texture2D
+		var tex: Texture2D = _textures.get(item as int) as Texture2D
 		if tex != null:
 			var icon_size := Vector2(node_radius * 1.35, node_radius * 1.35)
 			draw_texture_rect(tex, Rect2(pos - icon_size * 0.5, icon_size), false)

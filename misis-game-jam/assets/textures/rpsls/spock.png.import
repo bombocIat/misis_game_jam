@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://caeax1kfdqi3q"
-valid=false
+uid="uid://bpfgbaj17ft41"
+path="res://.godot/imported/spock.png-95db7a47b28ee7f7313ffb5456d4f50d.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/rpsls/spock.png"
+dest_files=["res://.godot/imported/spock.png-95db7a47b28ee7f7313ffb5456d4f50d.ctex"]
 
 [params]
 

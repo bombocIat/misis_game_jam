@@ -103,7 +103,8 @@ func choose_item(
 			# Weights from round-start snapshot — ignores cards played this round.
 			return _choose_weighted_from_counts(_round_win_counts, banned)
 		Persona.CHEATER:
-			return _choose_cheater(round_bans)
+			# Placeholder: basic weighted AI until Шулер bluffs are wired back.
+			return _choose_weighted(engine, round_bans)
 		_:
 			return _choose_weighted(engine, round_bans)
 

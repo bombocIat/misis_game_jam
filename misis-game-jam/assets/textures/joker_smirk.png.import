@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b03ykjtl1jfgj"
-path="res://.godot/imported/lizard.png-004b2f21fd9a00bdf8c9b95313fa1baf.ctex"
+uid="uid://cc0ka23wd5gfq"
+path="res://.godot/imported/joker_smirk.png-efabb8a81d9a8d87916ebb26422c726e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/rpsls/lizard.png"
-dest_files=["res://.godot/imported/lizard.png-004b2f21fd9a00bdf8c9b95313fa1baf.ctex"]
+source_file="res://assets/textures/joker_smirk.png"
+dest_files=["res://.godot/imported/joker_smirk.png-efabb8a81d9a8d87916ebb26422c726e.ctex"]
 
 [params]
 

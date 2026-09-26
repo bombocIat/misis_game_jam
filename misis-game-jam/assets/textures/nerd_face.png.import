@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bifgwfn0oyiuw"
-path="res://.godot/imported/lizard.svg-83f5ebbf00f31f25150096ef7a5c684a.ctex"
+uid="uid://bcj2j2m6fs5is"
+path="res://.godot/imported/nerd_face.png-eda148c99fb7a390d4502cf812d03093.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/rpsls/lizard.svg"
-dest_files=["res://.godot/imported/lizard.svg-83f5ebbf00f31f25150096ef7a5c684a.ctex"]
+source_file="res://assets/textures/nerd_face.png"
+dest_files=["res://.godot/imported/nerd_face.png-eda148c99fb7a390d4502cf812d03093.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

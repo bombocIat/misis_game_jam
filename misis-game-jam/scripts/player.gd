@@ -37,6 +37,9 @@ var _face: Sprite2D
 var _tex_neutral: Texture2D
 var _tex_smirk: Texture2D
 var _tex_angry: Texture2D
+var _face_base_pos: Vector2 = Vector2.ZERO
+## Applied to smirk/angry only (e.g. Joker emotions sit higher in the art).
+var _mood_offset: Vector2 = Vector2.ZERO
 var _mood_token: int = 0
 
 @onready var name_label: Label = %NameLabel
@@ -55,23 +58,35 @@ func _ready() -> void:
 	_refresh_hp_ui()
 
 
-## Bind a face sprite (e.g. MinerFace) for mood flashes. Does not move/scale it.
-func bind_face(face: Sprite2D, neutral: Texture2D, smirk: Texture2D, angry: Texture2D) -> void:
+## Bind a face sprite for mood flashes. `mood_offset` shifts smirk/angry (local px).
+func bind_face(
+	face: Sprite2D,
+	neutral: Texture2D,
+	smirk: Texture2D,
+	angry: Texture2D,
+	mood_offset: Vector2 = Vector2.ZERO
+) -> void:
 	_face = face
 	_tex_neutral = neutral
 	_tex_smirk = smirk
 	_tex_angry = angry
+	_mood_offset = mood_offset
 	_mood_token += 1
-	if _face != null and _tex_neutral != null:
-		_face.texture = _tex_neutral
+	if _face != null:
+		_face_base_pos = _face.position
+		if _tex_neutral != null:
+			_set_face_texture(_tex_neutral, false)
 
 
 func clear_face() -> void:
+	if _face != null:
+		_face.position = _face_base_pos
 	_mood_token += 1
 	_face = null
 	_tex_neutral = null
 	_tex_smirk = null
 	_tex_angry = null
+	_mood_offset = Vector2.ZERO
 
 
 func flash_hurt() -> void:
@@ -89,11 +104,16 @@ func flash_smirk() -> void:
 func _flash_mood(tex: Texture2D) -> void:
 	_mood_token += 1
 	var token: int = _mood_token
-	_face.texture = tex
+	_set_face_texture(tex, true)
 	await get_tree().create_timer(MOOD_FLASH_SEC).timeout
 	if token != _mood_token or not is_instance_valid(_face) or _tex_neutral == null:
 		return
-	_face.texture = _tex_neutral
+	_set_face_texture(_tex_neutral, false)
+
+
+func _set_face_texture(tex: Texture2D, use_mood_offset: bool) -> void:
+	_face.texture = tex
+	_face.position = _face_base_pos + (_mood_offset if use_mood_offset else Vector2.ZERO)
 
 
 func set_banned_items(items: Array[RuleEngine.Item]) -> void:
@@ -178,7 +198,7 @@ func reset_match(enable_input: bool = true) -> void:
 	input_enabled = enable_input
 	_mood_token += 1
 	if _face != null and _tex_neutral != null:
-		_face.texture = _tex_neutral
+		_set_face_texture(_tex_neutral, false)
 	_refresh_choice_ui()
 	_refresh_hp_ui()
 

@@ -6,6 +6,12 @@ const CARD_SCENE: PackedScene = preload("res://scenes/rule_card.tscn")
 const TEX_MASON_NEUTRAL: Texture2D = preload("res://assets/textures/miner_face.png")
 const TEX_MASON_SMIRK: Texture2D = preload("res://assets/textures/miner_face_smirk.png")
 const TEX_MASON_ANGRY: Texture2D = preload("res://assets/textures/miner_face_angry.png")
+const TEX_NERD_FACE: Texture2D = preload("res://assets/textures/nerd_face.png")
+const TEX_NERD_SMIRK: Texture2D = preload("res://assets/textures/nerd_smirk.png")
+const TEX_NERD_ANGRY: Texture2D = preload("res://assets/textures/nerd_angry.png")
+const TEX_JOKER_FACE: Texture2D = preload("res://assets/textures/joker_face.png")
+const TEX_JOKER_SMIRK: Texture2D = preload("res://assets/textures/joker_smirk.png")
+const TEX_JOKER_RAGE: Texture2D = preload("res://assets/textures/joker_rage.png")
 const MAX_HAND: int = 3
 const HAND_Y := 912.0
 const HAND_SPACING := 250.0
@@ -27,6 +33,10 @@ const DISCARD_STACK_OFFSET := Vector2(0.0, -10.0)
 @onready var card_hand: Node2D = %CardHand
 @onready var miner_body: Sprite2D = %MinerBody
 @onready var miner_face: Sprite2D = %MinerFace
+@onready var nerd_body: Sprite2D = %NerdBody
+@onready var nerd_face: Sprite2D = %NerdFace
+@onready var joker_body: Sprite2D = %JokerBody
+@onready var joker_face: Sprite2D = %JokerFace
 @onready var enemy_hud: Node2D = %EnemyHud
 @onready var enemy_hp_label: Label = %EnemyHpLabel
 @onready var enemy_name_label: Label = %EnemyNameLabel
@@ -222,14 +232,23 @@ func _start_match(tier: int, is_retry: bool) -> void:
 
 func _apply_ai_portrait() -> void:
 	var is_mason: bool = _ai.persona == AiOpponent.Persona.MASON
+	var is_botanist: bool = _ai.persona == AiOpponent.Persona.BOTANIST
+	var is_cheater: bool = _ai.persona == AiOpponent.Persona.CHEATER
 	miner_body.visible = is_mason
-	enemy_hud.visible = is_mason
+	nerd_body.visible = is_botanist
+	joker_body.visible = is_cheater
+	enemy_hud.visible = is_mason or is_botanist or is_cheater
 	enemy_name_label.text = _ai.get_display_name()
 	if is_mason:
 		player_2.bind_face(miner_face, TEX_MASON_NEUTRAL, TEX_MASON_SMIRK, TEX_MASON_ANGRY)
+	elif is_botanist:
+		player_2.bind_face(nerd_face, TEX_NERD_FACE, TEX_NERD_SMIRK, TEX_NERD_ANGRY)
+	elif is_cheater:
+		player_2.bind_face(
+			joker_face, TEX_JOKER_FACE, TEX_JOKER_SMIRK, TEX_JOKER_RAGE, Vector2(0.0, 20.0)
+		)
 	else:
 		player_2.clear_face()
-		miner_face.texture = TEX_MASON_NEUTRAL
 
 
 func _on_player_1_hp_changed(current: int, maximum: int) -> void:

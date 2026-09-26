@@ -4,11 +4,15 @@
 [ext_resource type="Texture2D" uid="uid://bkilbds3bp4mj" path="res://assets/textures/background_1-export.png" id="2_bg"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
-[ext_resource type="PackedScene" path="res://scenes/rules_overlay.tscn" id="6_overlay"]
+[ext_resource type="PackedScene" uid="uid://hubuj682bfq0" path="res://scenes/rules_overlay.tscn" id="6_overlay"]
 [ext_resource type="PackedScene" uid="uid://cbbdjmmatod7o" path="res://scenes/card_discard_zone.tscn" id="7_discard"]
 [ext_resource type="Texture2D" uid="uid://ccbjdn8p3ehsr" path="res://assets/textures/miner_face.png" id="8_kaaju"]
 [ext_resource type="PackedScene" path="res://scenes/tutorial_overlay.tscn" id="8_tut"]
 [ext_resource type="Texture2D" uid="uid://dk8xspmmgsm2e" path="res://assets/textures/miner_body.png" id="9_vcsrw"]
+[ext_resource type="Texture2D" uid="uid://bcj2j2m6fs5is" path="res://assets/textures/nerd_face.png" id="10_nerdface"]
+[ext_resource type="Texture2D" uid="uid://dw3213h6eieke" path="res://assets/textures/nerd_body.png" id="11_nerdbody"]
+[ext_resource type="Texture2D" uid="uid://3tax3wb7ocf8" path="res://assets/textures/joker_face.png" id="12_jokerface"]
+[ext_resource type="Texture2D" uid="uid://dxae7qducsycn" path="res://assets/textures/joker_body.png" id="13_jokerbody"]
 
 [node name="Test2" type="Node2D" unique_id=241795487]
 script = ExtResource("1_test2")
@@ -32,6 +36,7 @@ color = Color(0, 0, 0, 0.28)
 
 [node name="MinerBody" type="Sprite2D" parent="." unique_id=2074473761]
 unique_name_in_owner = true
+visible = false
 position = Vector2(644, 628.99994)
 scale = Vector2(2.7463937, 3.0389347)
 texture = ExtResource("9_vcsrw")
@@ -42,16 +47,41 @@ position = Vector2(-4.3693695, -113.85569)
 scale = Vector2(0.22778043, 0.20349407)
 texture = ExtResource("8_kaaju")
 
+[node name="NerdBody" type="Sprite2D" parent="." unique_id=363418104]
+unique_name_in_owner = true
+visible = false
+position = Vector2(644, 628.99994)
+scale = Vector2(2.7463937, 3.0389347)
+texture = ExtResource("11_nerdbody")
+
+[node name="NerdFace" type="Sprite2D" parent="NerdBody" unique_id=1805677653]
+unique_name_in_owner = true
+position = Vector2(-4.3693695, -113.85569)
+scale = Vector2(0.22778043, 0.20349407)
+texture = ExtResource("10_nerdface")
+
+[node name="JokerBody" type="Sprite2D" parent="." unique_id=784859597]
+unique_name_in_owner = true
+position = Vector2(644, 628.99994)
+scale = Vector2(2.7463937, 3.0389347)
+texture = ExtResource("13_jokerbody")
+
+[node name="JokerFace" type="Sprite2D" parent="JokerBody" unique_id=1253935268]
+unique_name_in_owner = true
+position = Vector2(-7.6463947, -150.38162)
+scale = Vector2(0.8, 0.712)
+texture = ExtResource("12_jokerface")
+
 [node name="EnemyHud" type="Node2D" parent="." unique_id=1844001099]
 unique_name_in_owner = true
 position = Vector2(946, 150)
 
 [node name="EnemyNameLabel" type="Label" parent="EnemyHud" unique_id=1844001002]
 unique_name_in_owner = true
-offset_left = -574.0
-offset_top = 333.0
-offset_right = -254.0
-offset_bottom = 371.0
+offset_left = -588.0
+offset_top = 334.0
+offset_right = -268.0
+offset_bottom = 372.0
 theme_override_colors/font_color = Color(1, 0.95, 0.85, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
@@ -62,10 +92,10 @@ vertical_alignment = 1
 
 [node name="EnemyHpLabel" type="Label" parent="EnemyHud" unique_id=1844001001]
 unique_name_in_owner = true
-offset_left = -326.0
-offset_top = 326.0
-offset_right = -46.0
-offset_bottom = 376.0
+offset_left = -346.0
+offset_top = 325.0
+offset_right = -66.0
+offset_bottom = 375.0
 theme_override_colors/font_color = Color(0.95, 0.9, 0.55, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
@@ -94,7 +124,7 @@ show_local_hud = false
 
 [node name="Player2" parent="." unique_id=110631946 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(649, 37)
+position = Vector2(623, 29)
 player_name = "AI"
 player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true
