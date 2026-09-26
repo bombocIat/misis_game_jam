@@ -3,11 +3,12 @@
 [ext_resource type="Texture2D" uid="uid://c422my4lp2uj" path="res://assets/textures/background_pixel_pesochnica.png" id="1_6ds4i"]
 [ext_resource type="Texture2D" uid="uid://bwawex1p6dbcd" path="res://assets/textures/huge_castle.png" id="2_5yu3y"]
 [ext_resource type="Texture2D" uid="uid://237ft6f6xsjs" path="res://assets/textures/orange_bucket.png" id="2_vqy6s"]
+[ext_resource type="Texture2D" uid="uid://dusiwoti2uebg" path="res://assets/textures/miner_body_without_bucket.png" id="2_wname"]
 [ext_resource type="Texture2D" uid="uid://ddww6jjm2n7oj" path="res://assets/textures/sand_kucha.png" id="2_yykt6"]
 [ext_resource type="Texture2D" uid="uid://doboxhlart8ew" path="res://assets/textures/sand_castle.png" id="3_yykt6"]
 
 [sub_resource type="Animation" id="Animation_5yu3y"]
-length = 0.001
+length = 7.4
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -80,10 +81,70 @@ tracks/5/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1)]
 }
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Miner:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Miner:position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(2003, -86)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Miner:rotation")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Miner:scale")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Bucket:self_modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
 
 [sub_resource type="Animation" id="Animation_vqy6s"]
 resource_name = "intro"
-length = 8.4
+length = 14.233334
 markers = [{
 "color": Color(1, 0.23921569, 1, 1),
 "name": &"new_marker_2",
@@ -96,6 +157,14 @@ markers = [{
 "color": Color(0.8750466, 0.34804353, 0.23097524, 1),
 "name": &"new_marker_3",
 "time": 7.8
+}, {
+"color": Color(0.6966495, 0, 0.09707401, 1),
+"name": &"new_marker_4",
+"time": 8.80343
+}, {
+"color": Color(0.017533503, 0.57678956, 0.17454198, 1),
+"name": &"new_marker_5",
+"time": 13.553927
 }]
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -104,10 +173,10 @@ tracks/0/path = NodePath("Bucket:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0.5333333, 0.7, 0.9, 1.4333333, 1.6333333, 1.9, 2.3666666, 3.1000001, 3.5900002, 4.3333335, 4.633333, 4.9666667, 5.5, 5.8000007, 6.3, 6.533334, 6.666667, 7.6666665, 7.866667, 8.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 0.2176377, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0.7333331, 0.8999998, 1.0999998, 1.6333331, 1.8333331, 2.1, 2.5666664, 3.3, 3.79, 4.5333333, 4.833333, 5.1666665, 5.7, 6.0000005, 6.5, 6.7333336, 6.866667, 7.8666663, 8.066667, 8.5, 13.233334, 13.566667, 13.766666),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 0.2176377, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(1575.1503, 1024.0696), Vector2(1452.05, 764.18), Vector2(1093, 524.9999), Vector2(344.99994, 211), Vector2(344.99988, 211), Vector2(330.00006, 740), Vector2(345, 211), Vector2(1575.1503, 1024.0696), Vector2(1575.1503, 1024.0696), Vector2(1556.9999, 351.00018), Vector2(1561, 740), Vector2(1546, 377), Vector2(641, 949), Vector2(641, 949), Vector2(972.00006, 98.000015), Vector2(983, 676.00006), Vector2(983, 676), Vector2(930.8, -218.965), Vector2(930.8, -218.96497), Vector2(1389.37, 468.435)]
+"values": [Vector2(1575.1503, 1024.0696), Vector2(1452.05, 764.18), Vector2(1093, 524.9999), Vector2(344.99994, 211), Vector2(344.99988, 211), Vector2(330.00006, 740), Vector2(345, 211), Vector2(1575.1503, 1024.0696), Vector2(1575.1503, 1024.0696), Vector2(1556.9999, 351.00018), Vector2(1561, 740), Vector2(1546, 377), Vector2(641, 949), Vector2(641, 949), Vector2(972.00006, 98.000015), Vector2(983, 676.00006), Vector2(983, 676), Vector2(930.8, -218.965), Vector2(930.8, -218.96497), Vector2(1389.37, 468.435), Vector2(1389.37, 468.435), Vector2(1389.37, 468.435), Vector2(1797, 261.9999)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -116,7 +185,7 @@ tracks/1/path = NodePath("Bucket:scale")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0.5333333, 1.2333333, 2.8333335, 3.6333334, 4.3333335, 4.9333334, 5.4666667, 5.8000007, 6.3, 7.866667, 8.333333),
+"times": PackedFloat32Array(0.7333331, 1.4333332, 3.0333333, 3.8333333, 4.5333333, 5.133333, 5.6666665, 6.0000005, 6.5, 8.066667, 8.533333),
 "transitions": PackedFloat32Array(1, 0.8705505, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 0,
 "values": [Vector2(6.7850256, 5.7358756), Vector2(5.532, 4.666), Vector2(6.7850256, 5.7358756), Vector2(6.75, 5.719), Vector2(5.18, 4.396), Vector2(5.18, 4.396), Vector2(6.5, 5.516), Vector2(6.5, 5.516), Vector2(5.54, 4.669), Vector2(5.415, 4.567), Vector2(4.02, 3.391)]
@@ -128,7 +197,7 @@ tracks/2/path = NodePath("Bucket:rotation")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0.5333333, 1.2333333, 2.3666666, 3.1333334, 3.5666668, 4.2999997, 4.9, 5.4666667, 5.8000007, 6.3, 7.866667, 8.3),
+"times": PackedFloat32Array(0.7333331, 1.4333332, 2.5666664, 3.3333333, 3.7666667, 4.4999995, 5.1, 5.6666665, 6.0000005, 6.5, 8.066667, 8.5),
 "transitions": PackedFloat32Array(1, 1.2311426, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 0,
 "values": [-0.124810256, 3.0159289474462008, 3.015929, 6.134832320760069, 6.1348324, 3.085709, 3.085709, 0.25830872929516097, 0.25830874, 3.1175513, 3.1175513, 1.2985249634837808]
@@ -140,7 +209,7 @@ tracks/3/path = NodePath("Castle:self_modulate")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"times": PackedFloat32Array(0.56666666, 1.8666667, 2.3),
+"times": PackedFloat32Array(0.7666665, 2.0666666, 2.4999998),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
@@ -152,7 +221,7 @@ tracks/4/path = NodePath("Kucha:self_modulate")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(-0.033333335, 4.633333, 4.9333334),
+"times": PackedFloat32Array(0.16666648, 4.833333, 5.133333),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
@@ -164,10 +233,70 @@ tracks/5/path = NodePath("Big_castle:self_modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"times": PackedFloat32Array(0, 7.1000004, 7.5000005),
+"times": PackedFloat32Array(0.19999981, 7.3, 7.7000003),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Miner:position")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(12, 12.5, 12.8, 13.1, 13.333333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(2003, -86), Vector2(2003, -216), Vector2(1954, -202.99991), Vector2(1954, -202.99991), Vector2(2184.86, -348.8577)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Miner:rotation")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(12, 12.5, 12.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, -0.04936341, -0.5634755]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Miner:scale")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(12, 12.5, 12.8, 13.1, 13.333333, 13.566667, 13.766666),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.2590001, 1.2385057), Vector2(1.3808523, 1.2385057), Vector2(1.3808523, 1.2385057), Vector2(2.947665, 1.2385057), Vector2(2.927, 1.23), Vector2(1.5814779, 1.23)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Miner:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0.19999981, 10.3, 11.966666, 13.766666, 14.166667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Bucket:self_modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(13.766666, 14.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
 
 [sub_resource type="Animation" id="Animation_wname"]
@@ -187,6 +316,10 @@ _data = {
 position = Vector2(960, 540.125)
 scale = Vector2(1.1483253, 1.1474494)
 texture = ExtResource("1_6ds4i")
+
+[node name="Miner" type="Sprite2D" parent="." unique_id=820895748]
+position = Vector2(2003, -86)
+texture = ExtResource("2_wname")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2114668502]
 libraries/ = SubResource("AnimationLibrary_2etud")
