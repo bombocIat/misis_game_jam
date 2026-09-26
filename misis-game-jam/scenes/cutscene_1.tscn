@@ -1,0 +1,214 @@
+[gd_scene format=3 uid="uid://ck1fdobnenw20"]
+
+[ext_resource type="Texture2D" uid="uid://c422my4lp2uj" path="res://assets/textures/background_pixel_pesochnica.png" id="1_6ds4i"]
+[ext_resource type="Texture2D" uid="uid://bwawex1p6dbcd" path="res://assets/textures/huge_castle.png" id="2_5yu3y"]
+[ext_resource type="Texture2D" uid="uid://237ft6f6xsjs" path="res://assets/textures/orange_bucket.png" id="2_vqy6s"]
+[ext_resource type="Texture2D" uid="uid://ddww6jjm2n7oj" path="res://assets/textures/sand_kucha.png" id="2_yykt6"]
+[ext_resource type="Texture2D" uid="uid://doboxhlart8ew" path="res://assets/textures/sand_castle.png" id="3_yykt6"]
+
+[sub_resource type="Animation" id="Animation_5yu3y"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Bucket:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1575.1503, 1024.0696)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Bucket:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(6.7850256, 5.7358756)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Bucket:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [-0.124810256]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Castle:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Kucha:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Big_castle:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_vqy6s"]
+resource_name = "intro"
+length = 8.4
+markers = [{
+"color": Color(1, 0.23921569, 1, 1),
+"name": &"new_marker_2",
+"time": 3.446685
+}, {
+"color": Color(0.45882353, 1, 1, 1),
+"name": &"new_marker",
+"time": 5.5
+}, {
+"color": Color(0.8750466, 0.34804353, 0.23097524, 1),
+"name": &"new_marker_3",
+"time": 7.8
+}]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Bucket:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.5333333, 0.7, 0.9, 1.4333333, 1.6333333, 1.9, 2.3666666, 3.1000001, 3.5900002, 4.3333335, 4.633333, 4.9666667, 5.5, 5.8000007, 6.3, 6.533334, 6.666667, 7.6666665, 7.866667, 8.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 0.2176377, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1575.1503, 1024.0696), Vector2(1452.05, 764.18), Vector2(1093, 524.9999), Vector2(344.99994, 211), Vector2(344.99988, 211), Vector2(330.00006, 740), Vector2(345, 211), Vector2(1575.1503, 1024.0696), Vector2(1575.1503, 1024.0696), Vector2(1556.9999, 351.00018), Vector2(1561, 740), Vector2(1546, 377), Vector2(641, 949), Vector2(641, 949), Vector2(972.00006, 98.000015), Vector2(983, 676.00006), Vector2(983, 676), Vector2(930.8, -218.965), Vector2(930.8, -218.96497), Vector2(1389.37, 468.435)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Bucket:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.5333333, 1.2333333, 2.8333335, 3.6333334, 4.3333335, 4.9333334, 5.4666667, 5.8000007, 6.3, 7.866667, 8.333333),
+"transitions": PackedFloat32Array(1, 0.8705505, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(6.7850256, 5.7358756), Vector2(5.532, 4.666), Vector2(6.7850256, 5.7358756), Vector2(6.75, 5.719), Vector2(5.18, 4.396), Vector2(5.18, 4.396), Vector2(6.5, 5.516), Vector2(6.5, 5.516), Vector2(5.54, 4.669), Vector2(5.415, 4.567), Vector2(4.02, 3.391)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Bucket:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.5333333, 1.2333333, 2.3666666, 3.1333334, 3.5666668, 4.2999997, 4.9, 5.4666667, 5.8000007, 6.3, 7.866667, 8.3),
+"transitions": PackedFloat32Array(1, 1.2311426, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [-0.124810256, 3.0159289474462008, 3.015929, 6.134832320760069, 6.1348324, 3.085709, 3.085709, 0.25830872929516097, 0.25830874, 3.1175513, 3.1175513, 1.2985249634837808]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Castle:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0.56666666, 1.8666667, 2.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Kucha:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(-0.033333335, 4.633333, 4.9333334),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Big_castle:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 7.1000004, 7.5000005),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_wname"]
+resource_name = "Ведро_двигается"
+length = 3.1333334
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_2etud"]
+_data = {
+&"RESET": SubResource("Animation_5yu3y"),
+&"intro": SubResource("Animation_vqy6s"),
+&"Ведро_двигается": SubResource("Animation_wname")
+}
+
+[node name="Cutscene1" type="Node2D" unique_id=896013854]
+
+[node name="background" type="Sprite2D" parent="." unique_id=318396450]
+position = Vector2(960, 540.125)
+scale = Vector2(1.1483253, 1.1474494)
+texture = ExtResource("1_6ds4i")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2114668502]
+libraries/ = SubResource("AnimationLibrary_2etud")
+autoplay = &"intro"
+
+[node name="Big_castle" type="Sprite2D" parent="." unique_id=717850294]
+position = Vector2(953, 438)
+scale = Vector2(1.8016129, 1.9554975)
+texture = ExtResource("2_5yu3y")
+
+[node name="Kucha" type="Sprite2D" parent="." unique_id=1247031856]
+position = Vector2(1570, 783)
+scale = Vector2(1.2622108, 1.5665796)
+texture = ExtResource("2_yykt6")
+
+[node name="Castle" type="Sprite2D" parent="." unique_id=1983739994]
+position = Vector2(346, 754.99994)
+scale = Vector2(4.6180553, 3.9716492)
+texture = ExtResource("3_yykt6")
+
+[node name="Bucket" type="Sprite2D" parent="." unique_id=314129313]
+position = Vector2(1575.1503, 1024.0696)
+rotation = -0.124810256
+scale = Vector2(6.7850256, 5.7358756)
+texture = ExtResource("2_vqy6s")
