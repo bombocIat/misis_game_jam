@@ -1,0 +1,51 @@
+class_name TutorialOverlay
+extends Control
+## First-run controls tutorial. Emits closed when dismissed.
+
+
+signal closed
+
+@onready var _panel: PanelContainer = %Panel
+
+
+func _ready() -> void:
+	visible = true
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	%BodyLabel.text = (
+		"УПРАВЛЕНИЕ\n\n"
+		+ "1 — камень\n"
+		+ "2 — ножницы\n"
+		+ "3 — бумага\n"
+		+ "4 — ящерица\n"
+		+ "5 — Спок\n"
+		+ "Space — бросок\n"
+		+ "R — реванш (после матча)\n\n"
+		+ "КАРТЫ\n\n"
+		+ "Перетащи в центр экрана — сыграть карту\n"
+		+ "Перетащи в мусорку справа внизу — сбросить без эффекта\n\n"
+		+ "Tab — статистика и пентаграмма правил\n\n"
+		+ "Space или клик — начать"
+	)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_SPACE or event.keycode == KEY_ENTER:
+			_dismiss()
+			get_viewport().set_input_as_handled()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_dismiss()
+		accept_event()
+
+
+func _dismiss() -> void:
+	if not visible:
+		return
+	visible = false
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	closed.emit()

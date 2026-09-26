@@ -26,6 +26,7 @@ const MAX_HP: int = 10
 var selected_item: RuleEngine.Item = RuleEngine.Item.ROCK
 var has_thrown: bool = false
 var hp: int = MAX_HP
+var banned_items: Array[RuleEngine.Item] = []
 
 @onready var name_label: Label = %NameLabel
 @onready var choice_label: Label = %ChoiceLabel
@@ -38,6 +39,35 @@ func _ready() -> void:
 	body.color = player_color
 	_refresh_choice_ui()
 	_refresh_hp_ui()
+
+
+func set_banned_items(items: Array[RuleEngine.Item]) -> void:
+	banned_items = items.duplicate()
+	if selected_item in banned_items:
+		_select_first_allowed()
+	_refresh_choice_ui()
+
+
+func clear_banned_items() -> void:
+	banned_items.clear()
+	_refresh_choice_ui()
+
+
+func is_item_allowed(item: RuleEngine.Item) -> bool:
+	return item not in banned_items
+
+
+func _select_first_allowed() -> void:
+	for item: RuleEngine.Item in [
+		RuleEngine.Item.ROCK,
+		RuleEngine.Item.SCISSORS,
+		RuleEngine.Item.PAPER,
+		RuleEngine.Item.LIZARD,
+		RuleEngine.Item.SPOCK,
+	]:
+		if is_item_allowed(item):
+			selected_item = item
+			return
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -55,17 +85,26 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_p1_keys(key)
 
 
-func pick(item: RuleEngine.Item) -> void:
+func pick(item: RuleEngine.Item) -> bool:
 	if has_thrown or not is_alive():
-		return
+		return false
+	if not is_item_allowed(item):
+		choice_label.text = "BAN: %s" % item_name(item)
+		return false
 	selected_item = item
 	choice_changed.emit(item)
 	_refresh_choice_ui()
+	return true
 
 
 func throw_item() -> void:
 	if has_thrown or not is_alive():
 		return
+	if not is_item_allowed(selected_item):
+		_select_first_allowed()
+		if not is_item_allowed(selected_item):
+			choice_label.text = "Нет доступных предметов"
+			return
 	has_thrown = true
 	_refresh_choice_ui()
 	thrown.emit(selected_item)
@@ -80,6 +119,7 @@ func reset_match(enable_input: bool = true) -> void:
 	hp = MAX_HP
 	has_thrown = false
 	selected_item = RuleEngine.Item.ROCK
+	banned_items.clear()
 	input_enabled = enable_input
 	_refresh_choice_ui()
 	_refresh_hp_ui()

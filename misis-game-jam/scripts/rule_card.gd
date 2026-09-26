@@ -1,6 +1,6 @@
 class_name RuleCard
 extends Area2D
-## Ability card with notebook textures. Special arts: no title, top pad.
+## Ability card with notebook / toilet-paper textures.
 
 enum Kind {
 	WIND,
@@ -13,6 +13,11 @@ enum Kind {
 	MIND_MELD,
 	SANDSTORM,
 	EQUALIZER,
+	BAN_ROCK,
+	BAN_SCISSORS,
+	BAN_PAPER,
+	BAN_LIZARD,
+	BAN_SPOCK,
 }
 
 const CARD_TYPE_ID := "rule_card"
@@ -23,47 +28,45 @@ const SPECIAL_TOP_PAD := 75.0
 const NORMAL_TOP_PAD := 15.0
 const LABEL_SIDE_PAD := 13.0
 
+const TOILET_ART := "res://assets/textures/toilet_paper_list.png"
+
+const PERMANENT_KINDS: Array[Kind] = [
+	Kind.WIND,
+	Kind.DRAGON,
+	Kind.HOMEWORK,
+	Kind.COOL_ROCK,
+	Kind.CHAOS,
+	Kind.VULCAN,
+	Kind.PAPER_PLANE,
+	Kind.MIND_MELD,
+	Kind.SANDSTORM,
+	Kind.EQUALIZER,
+]
+
+const BAN_KINDS: Array[Kind] = [
+	Kind.BAN_ROCK,
+	Kind.BAN_SCISSORS,
+	Kind.BAN_PAPER,
+	Kind.BAN_LIZARD,
+	Kind.BAN_SPOCK,
+]
+
 const ART: Dictionary = {
-	Kind.WIND: {
-		"path": "res://assets/textures/card_1(special).png",
-		"special": true,
-	},
-	Kind.DRAGON: {
-		"path": "res://assets/textures/card_2.png",
-		"special": false,
-	},
-	Kind.HOMEWORK: {
-		"path": "res://assets/textures/card_3(special).png",
-		"special": true,
-	},
-	Kind.COOL_ROCK: {
-		"path": "res://assets/textures/card_4.png",
-		"special": true,
-	},
-	Kind.CHAOS: {
-		"path": "res://assets/textures/card_1(special).png",
-		"special": true,
-	},
-	Kind.VULCAN: {
-		"path": "res://assets/textures/card_2.png",
-		"special": false,
-	},
-	Kind.PAPER_PLANE: {
-		"path": "res://assets/textures/card_3(special).png",
-		"special": true,
-	},
-	Kind.MIND_MELD: {
-		"path": "res://assets/textures/card_4.png",
-		"special": true,
-	},
-	Kind.SANDSTORM: {
-		"path": "res://assets/textures/card_2.png",
-		"special": false,
-	},
-	Kind.EQUALIZER: {
-		"path": "res://assets/textures/card_1(special).png",
-		"special": true,
-	},
+	Kind.WIND: {"path": "res://assets/textures/card_1(special).png", "special": true},
+	Kind.DRAGON: {"path": "res://assets/textures/card_2.png", "special": false},
+	Kind.HOMEWORK: {"path": "res://assets/textures/card_3(special).png", "special": true},
+	Kind.COOL_ROCK: {"path": "res://assets/textures/card_4.png", "special": true},
+	Kind.CHAOS: {"path": "res://assets/textures/card_1(special).png", "special": true},
+	Kind.VULCAN: {"path": "res://assets/textures/card_2.png", "special": false},
+	Kind.PAPER_PLANE: {"path": "res://assets/textures/card_3(special).png", "special": true},
+	Kind.MIND_MELD: {"path": "res://assets/textures/card_4.png", "special": true},
+	Kind.SANDSTORM: {"path": "res://assets/textures/card_2.png", "special": false},
+	Kind.EQUALIZER: {"path": "res://assets/textures/card_1(special).png", "special": true},
+	Kind.BAN_ROCK: {"path": TOILET_ART, "special": true},
+	Kind.BAN_SCISSORS: {"path": TOILET_ART, "special": true},
+	Kind.BAN_PAPER: {"path": TOILET_ART, "special": true},
+	Kind.BAN_LIZARD: {"path": TOILET_ART, "special": true},
+	Kind.BAN_SPOCK: {"path": TOILET_ART, "special": true},
 }
 
 @export var kind: Kind = Kind.WIND
@@ -96,6 +99,26 @@ func mark_resolved() -> void:
 
 func is_special() -> bool:
 	return bool(ART[kind]["special"])
+
+
+func is_round_ban() -> bool:
+	return kind in BAN_KINDS
+
+
+func get_ban_item() -> RuleEngine.Item:
+	match kind:
+		Kind.BAN_ROCK:
+			return RuleEngine.Item.ROCK
+		Kind.BAN_SCISSORS:
+			return RuleEngine.Item.SCISSORS
+		Kind.BAN_PAPER:
+			return RuleEngine.Item.PAPER
+		Kind.BAN_LIZARD:
+			return RuleEngine.Item.LIZARD
+		Kind.BAN_SPOCK:
+			return RuleEngine.Item.SPOCK
+		_:
+			return RuleEngine.Item.ROCK
 
 
 func get_title() -> String:
@@ -131,7 +154,17 @@ func get_ability_body() -> String:
 		Kind.SANDSTORM:
 			return "Камень бьёт Спока (+стек)"
 		Kind.EQUALIZER:
-			return "Оба направления: камень↔ножницы"
+			return "Камень и ножницы бьют друг друга"
+		Kind.BAN_ROCK:
+			return "1 раунд: нельзя камень"
+		Kind.BAN_SCISSORS:
+			return "1 раунд: нельзя ножницы"
+		Kind.BAN_PAPER:
+			return "1 раунд: нельзя бумагу"
+		Kind.BAN_LIZARD:
+			return "1 раунд: нельзя ящерицу"
+		Kind.BAN_SPOCK:
+			return "1 раунд: нельзя Спока"
 		_:
 			return ""
 
@@ -182,6 +215,8 @@ func apply_to(engine: RuleEngine) -> String:
 			var p1: int = engine.add_beat(RuleEngine.Item.ROCK, RuleEngine.Item.SCISSORS)
 			var p2: int = engine.add_beat(RuleEngine.Item.SCISSORS, RuleEngine.Item.ROCK)
 			return "Уравнитель: камень↔ножницы (урон %d / %d)" % [p1, p2]
+		Kind.BAN_ROCK, Kind.BAN_SCISSORS, Kind.BAN_PAPER, Kind.BAN_LIZARD, Kind.BAN_SPOCK:
+			return get_ability_body()
 		_:
 			return ""
 

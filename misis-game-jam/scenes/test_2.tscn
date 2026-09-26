@@ -5,7 +5,8 @@
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
 [ext_resource type="PackedScene" path="res://scenes/rules_overlay.tscn" id="6_overlay"]
-[ext_resource type="PackedScene" path="res://scenes/card_discard_zone.tscn" id="7_discard"]
+[ext_resource type="PackedScene" uid="uid://cbbdjmmatod7o" path="res://scenes/card_discard_zone.tscn" id="7_discard"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial_overlay.tscn" id="8_tut"]
 
 [node name="Test2" type="Node2D" unique_id=241795487]
 script = ExtResource("1_test2")
@@ -67,21 +68,8 @@ theme_override_font_sizes/font_size = 39
 text = "Pick items, then throw!"
 horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="UI" unique_id=386323405]
-unique_name_in_owner = true
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -70.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.85, 0.88, 0.95, 1)
-theme_override_font_sizes/font_size = 23
-text = "Controls"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="RulesOverlay" parent="UI" unique_id=888753658 instance=ExtResource("6_overlay")]
+unique_name_in_owner = true
+
+[node name="TutorialOverlay" parent="UI" unique_id=283886165 instance=ExtResource("8_tut")]
 unique_name_in_owner = true
