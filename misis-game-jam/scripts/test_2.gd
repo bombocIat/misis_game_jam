@@ -3,6 +3,9 @@ extends Node2D
 
 
 const CARD_SCENE: PackedScene = preload("res://scenes/rule_card.tscn")
+const TEX_MASON_NEUTRAL: Texture2D = preload("res://assets/textures/miner_face.png")
+const TEX_MASON_SMIRK: Texture2D = preload("res://assets/textures/miner_face_smirk.png")
+const TEX_MASON_ANGRY: Texture2D = preload("res://assets/textures/miner_face_angry.png")
 const MAX_HAND: int = 3
 const HAND_Y := 912.0
 const HAND_SPACING := 250.0
@@ -20,6 +23,13 @@ const AI_STACK_OFFSET := Vector2(130.0, 0.0)
 @onready var card_play_zone: Area2D = %CardPlayZone
 @onready var card_discard_zone: Area2D = %CardDiscardZone
 @onready var card_hand: Node2D = %CardHand
+@onready var miner_body: Sprite2D = %MinerBody
+@onready var miner_face: Sprite2D = %MinerFace
+@onready var enemy_hud: Node2D = %EnemyHud
+@onready var enemy_hp_label: Label = %EnemyHpLabel
+@onready var enemy_name_label: Label = %EnemyNameLabel
+@onready var player_hp_bar: ProgressBar = %PlayerHpBar
+@onready var player_hp_value: Label = %PlayerHpValue
 
 var _engine: RuleEngine = RuleEngine.new()
 var _stats: MatchStats = MatchStats.new()
@@ -60,8 +70,11 @@ func _ready() -> void:
 	_ensure_drag_input()
 	player_1.thrown.connect(_on_player_1_thrown)
 	player_2.thrown.connect(_on_player_2_thrown)
+	player_1.hp_changed.connect(_on_player_1_hp_changed)
+	player_2.hp_changed.connect(_on_player_2_hp_changed)
 	player_2.input_enabled = false
 	player_1.input_enabled = false
+	player_hp_bar.max_value = float(Player.MAX_HP)
 	rules_overlay.bind(_engine, _stats)
 	_setup_play_zone()
 	_setup_discard_zone()
@@ -173,7 +186,9 @@ func _start_match(tier: int, is_retry: bool) -> void:
 	player_1.reset_match(true)
 	player_2.reset_match(false)
 	player_2.player_name = _ai.get_display_name()
-	player_2.name_label.text = _ai.get_display_name()
+	_apply_ai_portrait()
+	_refresh_player_hp_hud(player_1.hp, Player.MAX_HP)
+	_refresh_enemy_hp_hud(player_2.hp, Player.MAX_HP)
 	_p1_ready = false
 	_p2_ready = false
 	_resolving = false
@@ -189,6 +204,44 @@ func _start_match(tier: int, is_retry: bool) -> void:
 			"Бой против %s (открыто до: %s). Выбери предмет или сыграй карту!"
 			% [_ai.get_display_name(), unlocked_hint]
 		)
+
+
+func _apply_ai_portrait() -> void:
+	var is_mason: bool = _ai.persona == AiOpponent.Persona.MASON
+	miner_body.visible = is_mason
+	enemy_hud.visible = is_mason
+	enemy_name_label.text = _ai.get_display_name()
+	if is_mason:
+		player_2.bind_face(miner_face, TEX_MASON_NEUTRAL, TEX_MASON_SMIRK, TEX_MASON_ANGRY)
+	else:
+		player_2.clear_face()
+		miner_face.texture = TEX_MASON_NEUTRAL
+
+
+func _on_player_1_hp_changed(current: int, maximum: int) -> void:
+	_refresh_player_hp_hud(current, maximum)
+
+
+func _on_player_2_hp_changed(current: int, maximum: int) -> void:
+	_refresh_enemy_hp_hud(current, maximum)
+
+
+func _refresh_player_hp_hud(current: int, maximum: int) -> void:
+	player_hp_bar.max_value = float(maximum)
+	player_hp_bar.value = float(current)
+	player_hp_value.text = "%d / %d" % [current, maximum]
+	if current <= 3:
+		player_hp_value.add_theme_color_override("font_color", Color(1.0, 0.35, 0.3))
+	else:
+		player_hp_value.add_theme_color_override("font_color", Color(0.9, 0.95, 0.9))
+
+
+func _refresh_enemy_hp_hud(current: int, maximum: int) -> void:
+	enemy_hp_label.text = "HP %d/%d" % [current, maximum]
+	if current <= 3:
+		enemy_hp_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3))
+	else:
+		enemy_hp_label.add_theme_color_override("font_color", Color(0.95, 0.9, 0.55))
 
 
 func _clear_hand() -> void:
@@ -432,6 +485,7 @@ func _try_resolve() -> void:
 			var dmg: int = base + bonus
 			dmg = _apply_rock_block(_p1_item, dmg, notes, left)
 			player_1.take_damage(dmg)
+			player_2.flash_smirk()
 			_apply_win_perks(player_2, player_1, _p2_item, _p1_item, notes, false)
 			_p2_win_streak += 1
 			_p1_win_streak = 0

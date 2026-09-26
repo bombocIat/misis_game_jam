@@ -1,3 +1,4 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+ai_campaign_v2.cfg

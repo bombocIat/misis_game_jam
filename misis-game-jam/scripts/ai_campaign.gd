@@ -3,7 +3,7 @@ extends RefCounted
 ## Unlock ladder: Каменщик → Ботаник → Шулер.
 
 
-const SAVE_PATH := "user://ai_campaign_v2.cfg"
+const SAVE_NAME := "ai_campaign_v2.cfg"
 const MAX_TIER := 2
 
 ## Highest unlocked opponent index (0..2).
@@ -16,9 +16,16 @@ func _init() -> void:
 	load_progress()
 
 
+## Editor → project root; export → next to the .exe.
+func _save_path() -> String:
+	if OS.has_feature("editor"):
+		return ProjectSettings.globalize_path("res://" + SAVE_NAME)
+	return OS.get_executable_path().get_base_dir().path_join(SAVE_NAME)
+
+
 func load_progress() -> void:
 	var cfg := ConfigFile.new()
-	if cfg.load(SAVE_PATH) != OK:
+	if cfg.load(_save_path()) != OK:
 		unlocked_tier = 0
 		current_tier = 0
 		return
@@ -30,7 +37,7 @@ func save_progress() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("campaign", "unlocked_tier", unlocked_tier)
 	cfg.set_value("campaign", "current_tier", current_tier)
-	cfg.save(SAVE_PATH)
+	cfg.save(_save_path())
 
 
 func persona_for_tier(tier: int) -> AiOpponent.Persona:

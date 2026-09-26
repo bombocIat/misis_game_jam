@@ -1,6 +1,7 @@
 class_name Player
 extends Node2D
-## Hotseat RPSLS thrower. Pick item, then throw (commit).
+## RPSLS thrower. Visuals (portrait / HP bar) are bound from the duel scene.
+
 
 signal choice_changed(item: RuleEngine.Item)
 signal thrown(item: RuleEngine.Item)
@@ -16,17 +17,27 @@ const ITEM_NAMES: Dictionary = {
 }
 
 const MAX_HP: int = 10
+const MOOD_FLASH_SEC := 1.0
 
 @export var player_name: String = "Player"
 @export var player_color: Color = Color(0.3, 0.7, 1.0)
 ## false = P1 keys 1-5 + Space; true = P2 keys 6-0 + Enter
 @export var is_player_two: bool = false
 @export var input_enabled: bool = true
+## Hide the old ColorRect body (squares removed from the duel UI).
+@export var show_body: bool = false
+## Show built-in HP/name labels (false when an external bar / enemy HUD is used).
+@export var show_local_hud: bool = true
 
 var selected_item: RuleEngine.Item = RuleEngine.Item.ROCK
 var has_thrown: bool = false
 var hp: int = MAX_HP
 var banned_items: Array[RuleEngine.Item] = []
+var _face: Sprite2D
+var _tex_neutral: Texture2D
+var _tex_smirk: Texture2D
+var _tex_angry: Texture2D
+var _mood_token: int = 0
 
 @onready var name_label: Label = %NameLabel
 @onready var choice_label: Label = %ChoiceLabel
@@ -37,8 +48,52 @@ var banned_items: Array[RuleEngine.Item] = []
 func _ready() -> void:
 	name_label.text = player_name
 	body.color = player_color
+	body.visible = show_body
+	name_label.visible = show_local_hud
+	hp_label.visible = show_local_hud
 	_refresh_choice_ui()
 	_refresh_hp_ui()
+
+
+## Bind a face sprite (e.g. MinerFace) for mood flashes. Does not move/scale it.
+func bind_face(face: Sprite2D, neutral: Texture2D, smirk: Texture2D, angry: Texture2D) -> void:
+	_face = face
+	_tex_neutral = neutral
+	_tex_smirk = smirk
+	_tex_angry = angry
+	_mood_token += 1
+	if _face != null and _tex_neutral != null:
+		_face.texture = _tex_neutral
+
+
+func clear_face() -> void:
+	_mood_token += 1
+	_face = null
+	_tex_neutral = null
+	_tex_smirk = null
+	_tex_angry = null
+
+
+func flash_hurt() -> void:
+	if _face == null or _tex_angry == null:
+		return
+	_flash_mood(_tex_angry)
+
+
+func flash_smirk() -> void:
+	if _face == null or _tex_smirk == null:
+		return
+	_flash_mood(_tex_smirk)
+
+
+func _flash_mood(tex: Texture2D) -> void:
+	_mood_token += 1
+	var token: int = _mood_token
+	_face.texture = tex
+	await get_tree().create_timer(MOOD_FLASH_SEC).timeout
+	if token != _mood_token or not is_instance_valid(_face) or _tex_neutral == null:
+		return
+	_face.texture = _tex_neutral
 
 
 func set_banned_items(items: Array[RuleEngine.Item]) -> void:
@@ -121,6 +176,9 @@ func reset_match(enable_input: bool = true) -> void:
 	selected_item = RuleEngine.Item.ROCK
 	banned_items.clear()
 	input_enabled = enable_input
+	_mood_token += 1
+	if _face != null and _tex_neutral != null:
+		_face.texture = _tex_neutral
 	_refresh_choice_ui()
 	_refresh_hp_ui()
 
@@ -143,6 +201,7 @@ func take_damage(amount: int = 1) -> void:
 	hp = maxi(0, hp - amount)
 	_refresh_hp_ui()
 	hp_changed.emit(hp, MAX_HP)
+	flash_hurt()
 	if hp <= 0:
 		died.emit()
 
@@ -191,6 +250,8 @@ func _refresh_choice_ui() -> void:
 
 
 func _refresh_hp_ui() -> void:
+	if not show_local_hud:
+		return
 	hp_label.text = "HP %d/%d" % [hp, MAX_HP]
 	if hp <= 3:
 		hp_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.3))

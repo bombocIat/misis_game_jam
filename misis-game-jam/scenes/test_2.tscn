@@ -6,7 +6,9 @@
 [ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
 [ext_resource type="PackedScene" path="res://scenes/rules_overlay.tscn" id="6_overlay"]
 [ext_resource type="PackedScene" uid="uid://cbbdjmmatod7o" path="res://scenes/card_discard_zone.tscn" id="7_discard"]
+[ext_resource type="Texture2D" uid="uid://ccbjdn8p3ehsr" path="res://assets/textures/miner_face.png" id="8_kaaju"]
 [ext_resource type="PackedScene" path="res://scenes/tutorial_overlay.tscn" id="8_tut"]
+[ext_resource type="Texture2D" uid="uid://dk8xspmmgsm2e" path="res://assets/textures/miner_body.png" id="9_vcsrw"]
 
 [node name="Test2" type="Node2D" unique_id=241795487]
 script = ExtResource("1_test2")
@@ -28,6 +30,49 @@ offset_bottom = 1080.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.28)
 
+[node name="MinerBody" type="Sprite2D" parent="." unique_id=2074473761]
+unique_name_in_owner = true
+position = Vector2(958, 625.99994)
+scale = Vector2(2.7463937, 3.0389347)
+texture = ExtResource("9_vcsrw")
+
+[node name="MinerFace" type="Sprite2D" parent="MinerBody" unique_id=1719113629]
+unique_name_in_owner = true
+position = Vector2(-4.3693695, -113.85569)
+scale = Vector2(0.22778043, 0.20349407)
+texture = ExtResource("8_kaaju")
+
+[node name="EnemyHud" type="Node2D" parent="." unique_id=1844001099]
+unique_name_in_owner = true
+position = Vector2(946, 150)
+
+[node name="EnemyNameLabel" type="Label" parent="EnemyHud" unique_id=1844001002]
+unique_name_in_owner = true
+offset_left = -154.0
+offset_top = -135.0
+offset_right = 166.0
+offset_bottom = -97.0
+theme_override_colors/font_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 33
+text = "Каменщик"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemyHpLabel" type="Label" parent="EnemyHud" unique_id=1844001001]
+unique_name_in_owner = true
+offset_left = -140.0
+offset_right = 140.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.95, 0.9, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 30
+text = "HP 10/10"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="CardPlayZone" parent="." unique_id=1826448262 instance=ExtResource("5_zone")]
 unique_name_in_owner = true
 position = Vector2(960, 480)
@@ -41,19 +86,55 @@ unique_name_in_owner = true
 
 [node name="Player1" parent="." unique_id=1303302973 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(420, 620)
+position = Vector2(112, 773)
 player_name = "Player 1"
 player_color = Color(0.25, 0.65, 1, 1)
+show_local_hud = false
 
 [node name="Player2" parent="." unique_id=110631946 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(1500, 580)
+position = Vector2(951, 5)
 player_name = "AI"
 player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true
 input_enabled = false
+show_local_hud = false
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1988716976]
+
+[node name="PlayerHpPanel" type="PanelContainer" parent="UI" unique_id=1844001100]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -110.0
+offset_right = 380.0
+offset_bottom = -28.0
+grow_vertical = 0
+
+[node name="VBox" type="VBoxContainer" parent="UI/PlayerHpPanel" unique_id=611526930]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlayerHpCaption" type="Label" parent="UI/PlayerHpPanel/VBox" unique_id=1928421]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Твоё HP"
+
+[node name="PlayerHpBar" type="ProgressBar" parent="UI/PlayerHpPanel/VBox" unique_id=1983579212]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+max_value = 10.0
+value = 10.0
+show_percentage = false
+
+[node name="PlayerHpValue" type="Label" parent="UI/PlayerHpPanel/VBox" unique_id=1306710774]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "10 / 10"
 
 [node name="StatusLabel" type="Label" parent="UI" unique_id=338989002]
 unique_name_in_owner = true
@@ -73,3 +154,5 @@ unique_name_in_owner = true
 
 [node name="TutorialOverlay" parent="UI" unique_id=283886165 instance=ExtResource("8_tut")]
 unique_name_in_owner = true
+offset_left = -1.0
+offset_right = -1.0
