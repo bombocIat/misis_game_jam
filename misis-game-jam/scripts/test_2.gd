@@ -14,6 +14,8 @@ const STACK_STEP := Vector2(14.0, -12.0)
 ## Player's played pile sits left of the zone center, the AI's — right.
 const PLAYER_STACK_OFFSET := Vector2(-130.0, 0.0)
 const AI_STACK_OFFSET := Vector2(130.0, 0.0)
+## Discarded cards sit under the bin, stacked flush (same spot).
+const DISCARD_STACK_OFFSET := Vector2(0.0, -10.0)
 
 @onready var player_1: Player = %Player1
 @onready var player_2: Player = %Player2
@@ -46,6 +48,7 @@ var _discard_drop_zone: DropZone
 var _match_over: bool = false
 var _play_stack_count: int = 0
 var _ai_stack_count: int = 0
+var _discard_stack_count: int = 0
 var _p1_win_streak: int = 0
 var _p2_win_streak: int = 0
 var _tie_streak: int = 0
@@ -55,6 +58,8 @@ var _round_index: int = 0
 var _prediction: int = -1
 ## Set when the player wins with paper: one extra draw next hand refill.
 var _paper_bonus_draw: bool = false
+## First tutorial close starts the match; later H opens are help-only.
+var _match_started_from_tutorial: bool = false
 
 const BUY_CARD_COST := 1
 const PREDICTION_KEYS: Dictionary = {
@@ -83,6 +88,9 @@ func _ready() -> void:
 
 
 func _on_tutorial_closed() -> void:
+	if _match_started_from_tutorial:
+		return
+	_match_started_from_tutorial = true
 	_start_match(_campaign.current_tier, false)
 
 
@@ -92,7 +100,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	var key: Key = (event as InputEventKey).keycode
-	if key == KEY_TAB:
+	if key == KEY_H:
+		tutorial_overlay.open_help()
+		get_viewport().set_input_as_handled()
+	elif key == KEY_TAB:
 		rules_overlay.toggle()
 		get_viewport().set_input_as_handled()
 	elif key == KEY_R and _match_over:
@@ -163,6 +174,8 @@ func _setup_discard_zone() -> void:
 	_discard_drop_zone.snap_style = DropZone.SNAP_STYLE.SNAP_CENTER
 	_discard_drop_zone.drop_behavior = DropBehaviorStack.new()
 	_discard_drop_zone.drop_accepted.connect(_on_discard_drop_accepted)
+	# Keep the whole bin (and discarded cards) above background ColorRects.
+	card_discard_zone.z_index = 10
 
 
 func _start_match(tier: int, is_retry: bool) -> void:
@@ -176,6 +189,7 @@ func _start_match(tier: int, is_retry: bool) -> void:
 	_clear_played_cards()
 	_play_stack_count = 0
 	_ai_stack_count = 0
+	_discard_stack_count = 0
 	_p1_win_streak = 0
 	_p2_win_streak = 0
 	_tie_streak = 0
@@ -251,6 +265,9 @@ func _clear_hand() -> void:
 
 func _clear_played_cards() -> void:
 	for child: Node in card_play_zone.get_children():
+		if child is RuleCard:
+			child.queue_free()
+	for child: Node in card_discard_zone.get_children():
 		if child is RuleCard:
 			child.queue_free()
 
@@ -386,14 +403,33 @@ func _on_discard_drop_accepted(_zone: DropZone, area: Area2D, _plan: DropPlan) -
 	if card == null or card.resolved:
 		return
 	card.mark_resolved()
+	_discard_stack_count += 1
+	# Under the bin sprite so the can covers them; still above the background.
+	card.z_as_relative = true
+	card.z_index = _discard_stack_count
+	card.modulate = Color.WHITE
 	_set_status("Карта сброшена (без эффекта)")
-	await get_tree().create_timer(0.15).timeout
-	if is_instance_valid(card):
-		card.queue_free()
-	await get_tree().process_frame
 	_layout_hand()
+	_settle_discarded_card(card, _discard_stack_count - 1)
 	if card_discard_zone.has_method("reset_visual"):
 		card_discard_zone.reset_visual()
+
+
+func _settle_discarded_card(card: RuleCard, _stack_index: int) -> void:
+	await get_tree().create_timer(0.18).timeout
+	if not is_instance_valid(card):
+		return
+	if card.get_parent() != card_discard_zone:
+		var global_pos: Vector2 = card.global_position
+		card.reparent(card_discard_zone)
+		card.global_position = global_pos
+	card.scale = Vector2.ONE
+	card.position = DISCARD_STACK_OFFSET
+	var drag: Draggable = card.get_node_or_null("Draggable") as Draggable
+	if drag != null:
+		drag.next_position = card.global_position
+		drag.previous_position = card.global_position
+		drag.state = Draggable.DRAGGABLE_STATE.IDLE
 
 
 func _on_player_1_thrown(item: RuleEngine.Item) -> void:

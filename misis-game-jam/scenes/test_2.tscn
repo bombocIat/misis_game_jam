@@ -32,7 +32,7 @@ color = Color(0, 0, 0, 0.28)
 
 [node name="MinerBody" type="Sprite2D" parent="." unique_id=2074473761]
 unique_name_in_owner = true
-position = Vector2(958, 625.99994)
+position = Vector2(644, 628.99994)
 scale = Vector2(2.7463937, 3.0389347)
 texture = ExtResource("9_vcsrw")
 
@@ -48,10 +48,10 @@ position = Vector2(946, 150)
 
 [node name="EnemyNameLabel" type="Label" parent="EnemyHud" unique_id=1844001002]
 unique_name_in_owner = true
-offset_left = -154.0
-offset_top = -135.0
-offset_right = 166.0
-offset_bottom = -97.0
+offset_left = -574.0
+offset_top = 333.0
+offset_right = -254.0
+offset_bottom = 371.0
 theme_override_colors/font_color = Color(1, 0.95, 0.85, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
@@ -62,9 +62,10 @@ vertical_alignment = 1
 
 [node name="EnemyHpLabel" type="Label" parent="EnemyHud" unique_id=1844001001]
 unique_name_in_owner = true
-offset_left = -140.0
-offset_right = 140.0
-offset_bottom = 45.0
+offset_left = -326.0
+offset_top = 326.0
+offset_right = -46.0
+offset_bottom = 376.0
 theme_override_colors/font_color = Color(0.95, 0.9, 0.55, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
@@ -75,11 +76,11 @@ vertical_alignment = 1
 
 [node name="CardPlayZone" parent="." unique_id=1826448262 instance=ExtResource("5_zone")]
 unique_name_in_owner = true
-position = Vector2(960, 480)
+position = Vector2(1381, 479)
 
 [node name="CardDiscardZone" parent="." unique_id=906822414 instance=ExtResource("7_discard")]
 unique_name_in_owner = true
-position = Vector2(1760, 900)
+position = Vector2(1741, 898)
 
 [node name="CardHand" type="Node2D" parent="." unique_id=1968767669]
 unique_name_in_owner = true
@@ -93,7 +94,7 @@ show_local_hud = false
 
 [node name="Player2" parent="." unique_id=110631946 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(951, 5)
+position = Vector2(649, 37)
 player_name = "AI"
 player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true

@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://b5wqxyc42r5u" path="res://addons/drag_and_drop/resources/drop_behaviors/drop_behavior_reject.gd" id="2_reject"]
 [ext_resource type="Script" uid="uid://djdmnemxrx7bg" path="res://addons/drag_and_drop/resources/draggable_types/draggable_type.gd" id="3_type"]
 [ext_resource type="Texture2D" uid="uid://pby5nr0fci4u" path="res://assets/textures/trash_can.png" id="4_closed"]
-[ext_resource type="Script" path="res://scripts/card_discard_zone.gd" id="5_bin"]
+[ext_resource type="Script" uid="uid://12hbgjk8wuvw" path="res://scripts/card_discard_zone.gd" id="5_bin"]
 
 [sub_resource type="Resource" id="Resource_reject"]
 script = ExtResource("2_reject")
@@ -12,36 +12,35 @@ script = ExtResource("2_reject")
 [sub_resource type="Resource" id="Resource_type"]
 script = ExtResource("3_type")
 
-[node name="CardDiscardZone" type="Area2D"]
+[node name="CardDiscardZone" type="Area2D" unique_id=1631184117]
 collision_layer = 2
 collision_mask = 2
-monitoring = true
-monitorable = true
 script = ExtResource("5_bin")
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=913907669]
+z_index = 21
 offset_left = -80.0
 offset_top = -20.0
 offset_right = 80.0
 offset_bottom = 40.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.95, 0.85, 0.7, 1)
 theme_override_font_sizes/font_size = 28
 text = "Сброс"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DropZone" type="Node2D" parent="." node_paths=PackedStringArray("attach_spot")]
+[node name="DropZone" type="Node2D" parent="." unique_id=632553417 node_paths=PackedStringArray("attach_spot")]
 script = ExtResource("1_drop")
 attach_spot = NodePath("..")
 drop_behavior = SubResource("Resource_reject")
 snap_style = 1
 accepted_draggable_types = Array[ExtResource("3_type")]([SubResource("Resource_type")])
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=804489081]
+z_index = 20
 position = Vector2(1, -28)
-scale = Vector2(1.3533334, 1.265)
+scale = Vector2(1.5, 1.402)
 texture = ExtResource("4_closed")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=162202130]
 polygon = PackedVector2Array(-94, -87, 95, -86, 69, 97, -65, 96)
