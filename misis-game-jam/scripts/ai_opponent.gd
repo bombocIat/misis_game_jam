@@ -22,7 +22,7 @@ const PERSONA_NAMES: Dictionary = {
 ## Каменщик: rock chance never below this.
 const MASON_ROCK_FLOOR := 0.5
 
-## Шулер: phrase → actual throw (lies / reverse psychology).
+## Шулер: phrase → actual throw (legacy single-item bluffs; dual uses distractions).
 const CHEATER_BLUFFS: Array[Dictionary] = [
 	{"line": "Я боюсь рептилий...", "play": RuleEngine.Item.ROCK},
 	{"line": "Сегодня будет камнепад!", "play": RuleEngine.Item.SPOCK},
@@ -35,6 +35,14 @@ const CHEATER_BLUFFS: Array[Dictionary] = [
 	{"line": "Режу всё подряд!", "play": RuleEngine.Item.ROCK},
 	{"line": "Вулканский разум подсказывает...", "play": RuleEngine.Item.SCISSORS},
 ]
+
+## Шулер: отвлекает, когда игнорирует бан хода.
+const CHEATER_DISTRACTIONS: PackedStringArray = [
+	"Смотри, птичка",
+	"Эй, сзади",
+	"у тебя шнурок развязался",
+]
+const CHEATER_BAN_IGNORE_CHANCE := 0.33
 
 ## Cards each persona may play (every AI_CARD_EVERY rounds).
 const PERSONA_CARDS: Dictionary = {
@@ -58,8 +66,10 @@ const PERSONA_CARDS: Dictionary = {
 const AI_CARD_EVERY := 2
 
 var persona: Persona = Persona.MASON
-## Last taunt line from Шулер (empty for others).
+## Last taunt / distraction line (empty when unused).
 var last_taunt: String = ""
+## Шулер ignored a round ban this throw.
+var ignored_ban: bool = false
 ## Botanist: items avoided this round (frozen at round start, before cards).
 var _round_avoid: Array[RuleEngine.Item] = []
 ## Win-counts snapshot at round start (used by botanist weights).
@@ -88,10 +98,23 @@ func pick_card_for_round(round_index: int) -> int:
 	return int(pool[randi() % pool.size()])
 
 
+## One or more items for this throw. Шулер always returns two when possible.
+func choose_items(
+	engine: RuleEngine, round_bans: Array[RuleEngine.Item] = []
+) -> Array[RuleEngine.Item]:
+	last_taunt = ""
+	ignored_ban = false
+	if persona == Persona.CHEATER:
+		return _choose_cheater_dual(engine, round_bans)
+	var single: Array[RuleEngine.Item] = [choose_item(engine, round_bans)]
+	return single
+
+
 func choose_item(
 	engine: RuleEngine, round_bans: Array[RuleEngine.Item] = []
 ) -> RuleEngine.Item:
 	last_taunt = ""
+	ignored_ban = false
 	match persona:
 		Persona.MASON:
 			return _choose_mason(engine, round_bans)
@@ -100,13 +123,39 @@ func choose_item(
 			for item: RuleEngine.Item in round_bans:
 				if item not in banned:
 					banned.append(item)
-			# Weights from round-start snapshot — ignores cards played this round.
 			return _choose_weighted_from_counts(_round_win_counts, banned)
 		Persona.CHEATER:
-			# Placeholder: basic weighted AI until Шулер bluffs are wired back.
-			return _choose_weighted(engine, round_bans)
+			var dual: Array[RuleEngine.Item] = _choose_cheater_dual(engine, round_bans)
+			return dual[0]
 		_:
 			return _choose_weighted(engine, round_bans)
+
+
+func _choose_cheater_dual(
+	engine: RuleEngine, round_bans: Array[RuleEngine.Item]
+) -> Array[RuleEngine.Item]:
+	var effective_bans: Array[RuleEngine.Item] = round_bans.duplicate()
+	if not round_bans.is_empty() and randf() < CHEATER_BAN_IGNORE_CHANCE:
+		ignored_ban = true
+		effective_bans.clear()
+		last_taunt = CHEATER_DISTRACTIONS[randi() % CHEATER_DISTRACTIONS.size()]
+
+	var first: RuleEngine.Item = _choose_weighted(engine, effective_bans)
+	var second_bans: Array[RuleEngine.Item] = effective_bans.duplicate()
+	if first not in second_bans:
+		second_bans.append(first)
+	var second: RuleEngine.Item = _choose_weighted(engine, second_bans)
+	var result: Array[RuleEngine.Item] = [first]
+	if second != first:
+		result.append(second)
+	else:
+		# Fallback: any other allowed item so Шулер still plays two when possible.
+		for item: RuleEngine.Item in ITEMS:
+			if item == first or item in effective_bans:
+				continue
+			result.append(item)
+			break
+	return result
 
 
 func _choose_mason(

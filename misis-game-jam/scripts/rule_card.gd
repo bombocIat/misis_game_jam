@@ -72,6 +72,8 @@ const ART: Dictionary = {
 @export var kind: Kind = Kind.WIND
 
 var resolved: bool = false
+## Rounds spent in hand without being played. Auto-discard at 2.
+var idle_rounds: int = 0
 
 @onready var _label: Label = %AbilityLabel
 @onready var _art: TextureRect = %CardArt

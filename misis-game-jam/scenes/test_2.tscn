@@ -5,14 +5,27 @@
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/card_play_zone.tscn" id="5_zone"]
 [ext_resource type="PackedScene" uid="uid://hubuj682bfq0" path="res://scenes/rules_overlay.tscn" id="6_overlay"]
-[ext_resource type="PackedScene" uid="uid://cbbdjmmatod7o" path="res://scenes/card_discard_zone.tscn" id="7_discard"]
+[ext_resource type="PackedScene" uid="uid://cu6yu4vhqxant" path="res://scenes/beats_diagram.tscn" id="7_beats"]
 [ext_resource type="Texture2D" uid="uid://ccbjdn8p3ehsr" path="res://assets/textures/miner_face.png" id="8_kaaju"]
 [ext_resource type="PackedScene" path="res://scenes/tutorial_overlay.tscn" id="8_tut"]
 [ext_resource type="Texture2D" uid="uid://dk8xspmmgsm2e" path="res://assets/textures/miner_body.png" id="9_vcsrw"]
 [ext_resource type="Texture2D" uid="uid://bcj2j2m6fs5is" path="res://assets/textures/nerd_face.png" id="10_nerdface"]
 [ext_resource type="Texture2D" uid="uid://dw3213h6eieke" path="res://assets/textures/nerd_body.png" id="11_nerdbody"]
 [ext_resource type="Texture2D" uid="uid://3tax3wb7ocf8" path="res://assets/textures/joker_face.png" id="12_jokerface"]
-[ext_resource type="Texture2D" uid="uid://dxae7qducsycn" path="res://assets/textures/joker_body.png" id="13_jokerbody"]
+[ext_resource type="Texture2D" uid="uid://dpvhc17rf0hxs" path="res://assets/textures/joker_body.png" id="13_jokerbody"]
+[ext_resource type="Script" uid="uid://mcuhmr4evfq6" path="res://scripts/throw_anim_player.gd" id="14_throw"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_hit_zone.tscn" id="15_hitzone"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_noborder"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.08, 0.09, 0.12, 0.92)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="Test2" type="Node2D" unique_id=241795487]
 script = ExtResource("1_test2")
@@ -72,9 +85,28 @@ position = Vector2(-7.6463947, -150.38162)
 scale = Vector2(0.8, 0.712)
 texture = ExtResource("12_jokerface")
 
+[node name="CheaterBubble" type="PanelContainer" parent="." unique_id=44935810]
+unique_name_in_owner = true
+z_index = 30
+offset_left = 820.0
+offset_top = 203.0
+offset_right = 1180.0
+offset_bottom = 323.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_noborder")
+
+[node name="CheaterBubbleLabel" type="Label" parent="CheaterBubble" unique_id=1841087894]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.85, 1)
+theme_override_font_sizes/font_size = 28
+text = "…"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
 [node name="EnemyHud" type="Node2D" parent="." unique_id=1844001099]
 unique_name_in_owner = true
-position = Vector2(946, 150)
+position = Vector2(948, -259)
 
 [node name="EnemyNameLabel" type="Label" parent="EnemyHud" unique_id=1844001002]
 unique_name_in_owner = true
@@ -83,8 +115,6 @@ offset_top = 334.0
 offset_right = -268.0
 offset_bottom = 372.0
 theme_override_colors/font_color = Color(1, 0.95, 0.85, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 33
 text = "Каменщик"
 horizontal_alignment = 1
@@ -97,8 +127,6 @@ offset_top = 325.0
 offset_right = -66.0
 offset_bottom = 375.0
 theme_override_colors/font_color = Color(0.95, 0.9, 0.55, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 30
 text = "HP 10/10"
 horizontal_alignment = 1
@@ -108,12 +136,33 @@ vertical_alignment = 1
 unique_name_in_owner = true
 position = Vector2(1381, 479)
 
-[node name="CardDiscardZone" parent="." unique_id=906822414 instance=ExtResource("7_discard")]
+[node name="SideBeatsDiagram" parent="." unique_id=1934136399 instance=ExtResource("7_beats")]
 unique_name_in_owner = true
-position = Vector2(1741, 898)
+z_index = 10
+offset_left = 1553.5
+offset_top = 710.5
+offset_right = 1928.5
+offset_bottom = 1085.5
 
 [node name="CardHand" type="Node2D" parent="." unique_id=1968767669]
 unique_name_in_owner = true
+z_index = 12
+
+[node name="EnemyHitZone" parent="." unique_id=568926681 instance=ExtResource("15_hitzone")]
+unique_name_in_owner = true
+position = Vector2(644, 480)
+
+[node name="ThrowTray" type="Node2D" parent="." unique_id=1957410933]
+unique_name_in_owner = true
+z_index = 15
+
+[node name="PaperThrowFx" type="AnimatedSprite2D" parent="." unique_id=22221404]
+unique_name_in_owner = true
+visible = false
+z_index = 40
+position = Vector2(520, 620)
+scale = Vector2(0.55, 0.55)
+script = ExtResource("14_throw")
 
 [node name="Player1" parent="." unique_id=1303302973 instance=ExtResource("2_player")]
 unique_name_in_owner = true
@@ -124,7 +173,7 @@ show_local_hud = false
 
 [node name="Player2" parent="." unique_id=110631946 instance=ExtResource("2_player")]
 unique_name_in_owner = true
-position = Vector2(623, 29)
+position = Vector2(517, -231)
 player_name = "AI"
 player_color = Color(1, 0.4, 0.35, 1)
 is_player_two = true
@@ -143,6 +192,7 @@ offset_top = -110.0
 offset_right = 380.0
 offset_bottom = -28.0
 grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_noborder")
 
 [node name="VBox" type="VBoxContainer" parent="UI/PlayerHpPanel" unique_id=611526930]
 layout_mode = 2
@@ -158,7 +208,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 max_value = 10.0
-value = 10.0
+value = 7.0
 show_percentage = false
 
 [node name="PlayerHpValue" type="Label" parent="UI/PlayerHpPanel/VBox" unique_id=1306710774]
@@ -169,6 +219,7 @@ text = "10 / 10"
 
 [node name="StatusLabel" type="Label" parent="UI" unique_id=338989002]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 400.0

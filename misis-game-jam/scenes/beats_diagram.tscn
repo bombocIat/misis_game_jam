@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://5vh1hv6xowh8" path="res://scripts/beats_diagram.gd" id="1_beats"]
 
 [node name="BeatsDiagram" type="Control" unique_id=842939195]
-custom_minimum_size = Vector2(300, 300)
+custom_minimum_size = Vector2(375, 375)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 300.0
-offset_bottom = 300.0
+offset_right = 375.0
+offset_bottom = 375.0
 mouse_filter = 2
 script = ExtResource("1_beats")

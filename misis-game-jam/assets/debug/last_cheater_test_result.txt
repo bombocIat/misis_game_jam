@@ -1,0 +1,18 @@
+=== CheaterDualResolve / AiOpponent.CHEATER tests ===
+--- exhaustive p1 × ai_a × ai_b (125) ---
+OK   exhaustive: 125 triples
+--- named scenarios ---
+OK   ROCK beats SCISSORS+LIZARD -> 1
+OK   ROCK loses to PAPER+SPOCK -> -1
+OK   ROCK win+lose → tie by score -> 0
+OK   ROCK vs ROCK+SCISSORS → tie dominates -> 0
+OK   PAPER vs PAPER+PAPER → tie -> 0
+OK   LIZARD loses to ROCK+SCISSORS -> -1
+OK   SPOCK beats ROCK+SCISSORS -> 1
+--- choose_items returns 2 ---
+OK   choose_items: 40 trials, always 2 distinct
+--- ban ignore ~33% + distraction ---
+OK   ignore rate=0.357 (107/300)
+OK   ban ignore behavior
+PASS: all Шулер algorithm checks ok
+=== Cheater tests finished ===

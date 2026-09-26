@@ -40,8 +40,11 @@ const ITEM_COLORS: Dictionary = {
 	RuleEngine.Item.SPOCK: Color(0.59, 0, 0.18), #215 0 64
 }
 
-@export var radius: float = 120.0
-@export var node_radius: float = 28.0
+@export var radius: float = 150.0
+@export var node_radius: float = 35.0
+@export var arrow_width: float = 5.0
+@export var double_arrow_width: float = 6.0
+@export var arrow_head_size: float = 20.0
 
 var _engine: RuleEngine
 var _textures: Dictionary = {}
@@ -81,15 +84,6 @@ func _draw() -> void:
 	var center: Vector2 = size * 0.5
 	var positions: Dictionary = _vertex_positions(center)
 
-	# Soft pentagon outline.
-	var outline: PackedVector2Array = PackedVector2Array()
-	for item: RuleEngine.Item in ITEMS:
-		outline.append(positions[item] as Vector2)
-	for i: int in range(outline.size()):
-		var a: Vector2 = outline[i]
-		var b: Vector2 = outline[(i + 1) % outline.size()]
-		draw_line(a, b, Color(1, 1, 1, 0.45), 2.0)
-
 	# Arrows from undirected pairs: mutual beats → one white double arrow.
 	for i: int in range(ITEMS.size()):
 		for j: int in range(i + 1, ITEMS.size()):
@@ -110,7 +104,6 @@ func _draw() -> void:
 	for item: RuleEngine.Item in ITEMS:
 		var pos: Vector2 = positions[item] as Vector2
 		draw_circle(pos, node_radius, Color(0.12, 0.14, 0.18, 1))
-		draw_arc(pos, node_radius, 0.0, TAU, 32, ITEM_COLORS[item] as Color, 2.5, true)
 		var tex: Texture2D = _textures.get(item as int) as Texture2D
 		if tex != null:
 			var icon_size := Vector2(node_radius * 1.35, node_radius * 1.35)
@@ -159,7 +152,7 @@ func _draw_arrow(from: Vector2, to: Vector2, color: Color) -> void:
 	var start: Vector2 = ends[0]
 	var end: Vector2 = ends[1]
 	var dir: Vector2 = (end - start).normalized()
-	draw_line(start, end, color, 2.5)
+	draw_line(start, end, color, arrow_width)
 	_draw_arrow_head(end, dir, color)
 
 
@@ -170,7 +163,7 @@ func _draw_double_arrow(from: Vector2, to: Vector2, color: Color) -> void:
 	var start: Vector2 = ends[0]
 	var end: Vector2 = ends[1]
 	var dir: Vector2 = (end - start).normalized()
-	draw_line(start, end, color, 3.0)
+	draw_line(start, end, color, double_arrow_width)
 	_draw_arrow_head(end, dir, color)
 	_draw_arrow_head(start, -dir, color)
 
@@ -189,7 +182,7 @@ func _arrow_ends(from: Vector2, to: Vector2) -> PackedVector2Array:
 
 
 func _draw_arrow_head(tip: Vector2, dir: Vector2, color: Color) -> void:
-	var head: float = 10.0
+	var head: float = arrow_head_size
 	var left: Vector2 = tip - dir.rotated(0.4) * head
 	var right: Vector2 = tip - dir.rotated(-0.4) * head
 	draw_colored_polygon(PackedVector2Array([tip, left, right]), color)

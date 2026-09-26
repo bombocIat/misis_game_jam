@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/throw_token.gd" id="1_token"]
+[ext_resource type="Script" path="res://addons/drag_and_drop/scripts/draggable.gd" id="2_drag"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_token"]
+radius = 56.0
+
+[node name="ThrowToken" type="Area2D"]
+collision_layer = 2
+collision_mask = 2
+monitoring = true
+monitorable = true
+script = ExtResource("1_token")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_token")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+scale = Vector2(1.35, 1.35)
+
+[node name="Draggable" type="Node" parent="."]
+script = ExtResource("2_drag")
+relative_dragging = true
+dragging_speed = 40.0

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cywnhi5tvicb0"]
+
+[ext_resource type="Script" uid="uid://bmxnoh21w6mhi" path="res://scripts/test_cheater_dual.gd" id="1_test"]
+
+[node name="TestCheaterDual" type="Node" unique_id=847755226]
+script = ExtResource("1_test")

@@ -3,6 +3,7 @@ extends Node2D
 
 
 const CARD_SCENE: PackedScene = preload("res://scenes/rule_card.tscn")
+const THROW_TOKEN_SCENE: PackedScene = preload("res://scenes/throw_token.tscn")
 const TEX_MASON_NEUTRAL: Texture2D = preload("res://assets/textures/miner_face.png")
 const TEX_MASON_SMIRK: Texture2D = preload("res://assets/textures/miner_face_smirk.png")
 const TEX_MASON_ANGRY: Texture2D = preload("res://assets/textures/miner_face_angry.png")
@@ -12,16 +13,33 @@ const TEX_NERD_ANGRY: Texture2D = preload("res://assets/textures/nerd_angry.png"
 const TEX_JOKER_FACE: Texture2D = preload("res://assets/textures/joker_face.png")
 const TEX_JOKER_SMIRK: Texture2D = preload("res://assets/textures/joker_smirk.png")
 const TEX_JOKER_RAGE: Texture2D = preload("res://assets/textures/joker_rage.png")
+const TEX_THROW: Dictionary = {
+	RuleEngine.Item.ROCK: preload("res://assets/textures/rpsls/rock.png"),
+	RuleEngine.Item.SCISSORS: preload("res://assets/textures/rpsls/scissors.png"),
+	RuleEngine.Item.PAPER: preload("res://assets/textures/rpsls/paper.png"),
+	RuleEngine.Item.LIZARD: preload("res://assets/textures/rpsls/lizard.png"),
+	RuleEngine.Item.SPOCK: preload("res://assets/textures/rpsls/spock.png"),
+}
 const MAX_HAND: int = 3
-const HAND_Y := 912.0
-const HAND_SPACING := 250.0
-const HAND_CENTER_X := 960.0
+## Rule cards: vertical column on the right wall above the pentagram.
+const HAND_X := 1760.0
+const HAND_TOP_Y := 190.0
+const HAND_V_SPACING := 180.0
+const HAND_CARD_SCALE := Vector2(0.676, 0.676)
+## Throw tokens along the bottom (old hand area), clear of left HP UI.
+const THROW_Y := 992.0
+const THROW_START_X := 480.0
+const THROW_SPACING := 190.0
 const STACK_STEP := Vector2(14.0, -12.0)
 ## Player's played pile sits left of the zone center, the AI's — right.
 const PLAYER_STACK_OFFSET := Vector2(-130.0, 0.0)
 const AI_STACK_OFFSET := Vector2(130.0, 0.0)
-## Discarded cards sit under the bin, stacked flush (same spot).
-const DISCARD_STACK_OFFSET := Vector2(0.0, -10.0)
+const CARD_IDLE_DISCARD_ROUNDS := 2
+## Enemy throw reveal icons (near opponent).
+const ENEMY_THROW_ICON_POS := Vector2(1038.0, 584.0)
+const ENEMY_THROW_ICON_SPACING := 110.0
+const ENEMY_THROW_ICON_SCALE := Vector2(2.025, 2.025)
+const THROW_TOKEN_SCALE := Vector2(1.5, 1.5)
 
 @onready var player_1: Player = %Player1
 @onready var player_2: Player = %Player2
@@ -29,8 +47,10 @@ const DISCARD_STACK_OFFSET := Vector2(0.0, -10.0)
 @onready var rules_overlay: RulesOverlay = %RulesOverlay
 @onready var tutorial_overlay: TutorialOverlay = %TutorialOverlay
 @onready var card_play_zone: Area2D = %CardPlayZone
-@onready var card_discard_zone: Area2D = %CardDiscardZone
 @onready var card_hand: Node2D = %CardHand
+@onready var side_beats: BeatsDiagram = %SideBeatsDiagram
+@onready var enemy_hit_zone: Area2D = %EnemyHitZone
+@onready var throw_tray: Node2D = %ThrowTray
 @onready var miner_body: Sprite2D = %MinerBody
 @onready var miner_face: Sprite2D = %MinerFace
 @onready var nerd_body: Sprite2D = %NerdBody
@@ -43,6 +63,13 @@ const DISCARD_STACK_OFFSET := Vector2(0.0, -10.0)
 @onready var player_hp_bar: ProgressBar = %PlayerHpBar
 @onready var player_hp_value: Label = %PlayerHpValue
 
+var cheater_bubble: PanelContainer
+var cheater_bubble_label: Label
+var _throw_tokens: Array[ThrowToken] = []
+var _enemy_drop_zone: DropZone
+var _enemy_throw_icons: Node2D
+var _parked_throw_token: ThrowToken
+
 var _engine: RuleEngine = RuleEngine.new()
 var _stats: MatchStats = MatchStats.new()
 var _ai: AiOpponent = AiOpponent.new()
@@ -51,14 +78,14 @@ var _p1_ready: bool = false
 var _p2_ready: bool = false
 var _p1_item: RuleEngine.Item = RuleEngine.Item.ROCK
 var _p2_item: RuleEngine.Item = RuleEngine.Item.ROCK
+## AI may throw several items (Шулер = 2). Primary is _p2_item = first.
+var _p2_items: Array[RuleEngine.Item] = []
 var _resolving: bool = false
 var _ai_thinking: bool = false
 var _drop_zone: DropZone
-var _discard_drop_zone: DropZone
 var _match_over: bool = false
 var _play_stack_count: int = 0
 var _ai_stack_count: int = 0
-var _discard_stack_count: int = 0
 var _p1_win_streak: int = 0
 var _p2_win_streak: int = 0
 var _tie_streak: int = 0
@@ -83,6 +110,7 @@ const PREDICTION_KEYS: Dictionary = {
 
 func _ready() -> void:
 	_ensure_drag_input()
+	_ensure_cheater_bubble()
 	player_1.thrown.connect(_on_player_1_thrown)
 	player_2.thrown.connect(_on_player_2_thrown)
 	player_1.hp_changed.connect(_on_player_1_hp_changed)
@@ -90,11 +118,52 @@ func _ready() -> void:
 	player_2.input_enabled = false
 	player_1.input_enabled = false
 	player_hp_bar.max_value = float(Player.MAX_HP)
+	status_label.visible = false
 	rules_overlay.bind(_engine, _stats)
+	side_beats.bind_engine(_engine)
 	_setup_play_zone()
-	_setup_discard_zone()
+	_setup_enemy_hit_zone()
+	_ensure_enemy_throw_icons()
+	_spawn_throw_tokens()
 	tutorial_overlay.closed.connect(_on_tutorial_closed)
+	_hide_cheater_bubble()
 	_set_status("Прочитай туториал, затем Space или клик")
+
+
+## Bubble can vanish if the scene is resaved without it — recreate at runtime.
+func _ensure_cheater_bubble() -> void:
+	cheater_bubble = get_node_or_null("%CheaterBubble") as PanelContainer
+	cheater_bubble_label = get_node_or_null("%CheaterBubbleLabel") as Label
+	if cheater_bubble != null and cheater_bubble_label != null:
+		return
+	cheater_bubble = PanelContainer.new()
+	cheater_bubble.name = "CheaterBubble"
+	cheater_bubble.unique_name_in_owner = true
+	cheater_bubble.visible = false
+	cheater_bubble.z_index = 30
+	cheater_bubble.offset_left = 820.0
+	cheater_bubble.offset_top = 360.0
+	cheater_bubble.offset_right = 1180.0
+	cheater_bubble.offset_bottom = 480.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.09, 0.12, 0.92)
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 12
+	style.content_margin_top = 10
+	style.content_margin_right = 12
+	style.content_margin_bottom = 10
+	cheater_bubble.add_theme_stylebox_override("panel", style)
+	add_child(cheater_bubble)
+	cheater_bubble_label = Label.new()
+	cheater_bubble_label.name = "CheaterBubbleLabel"
+	cheater_bubble_label.unique_name_in_owner = true
+	cheater_bubble_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	cheater_bubble_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cheater_bubble_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	cheater_bubble_label.add_theme_font_size_override("font_size", 28)
+	cheater_bubble_label.add_theme_color_override("font_color", Color(1, 0.95, 0.85, 1))
+	cheater_bubble_label.text = "…"
+	cheater_bubble.add_child(cheater_bubble_label)
 
 
 func _on_tutorial_closed() -> void:
@@ -178,15 +247,124 @@ func _setup_play_zone() -> void:
 	_drop_zone.drop_applied.connect(_on_play_drop_applied)
 
 
-func _setup_discard_zone() -> void:
-	_discard_drop_zone = card_discard_zone.get_node("DropZone") as DropZone
-	_discard_drop_zone.accepted_draggable_types = _make_card_type_list()
-	_discard_drop_zone.snap_style = DropZone.SNAP_STYLE.SNAP_CENTER
-	_discard_drop_zone.drop_behavior = DropBehaviorStack.new()
-	_discard_drop_zone.drop_accepted.connect(_on_discard_drop_accepted)
-	# Keep the whole bin (and discarded cards) above background ColorRects.
-	card_discard_zone.z_index = 10
+func _setup_enemy_hit_zone() -> void:
+	_enemy_drop_zone = enemy_hit_zone.get_node("DropZone") as DropZone
+	var throw_type := DraggableType.new()
+	throw_type.id = ThrowToken.THROW_TYPE_ID
+	var accepted: Array[DraggableType] = []
+	accepted.append(throw_type)
+	_enemy_drop_zone.accepted_draggable_types = accepted
+	_enemy_drop_zone.snap_style = DropZone.SNAP_STYLE.SNAP_CENTER
+	_enemy_drop_zone.drop_behavior = DropBehaviorStack.new()
+	_enemy_drop_zone.drop_applied.connect(_on_enemy_throw_drop_applied)
+	enemy_hit_zone.z_index = 5
+	enemy_hit_zone.monitoring = true
+	enemy_hit_zone.monitorable = true
 
+
+func _spawn_throw_tokens() -> void:
+	_parked_throw_token = null
+	for child: Node in throw_tray.get_children():
+		child.queue_free()
+	_throw_tokens.clear()
+	var order: Array[RuleEngine.Item] = [
+		RuleEngine.Item.ROCK,
+		RuleEngine.Item.SCISSORS,
+		RuleEngine.Item.PAPER,
+		RuleEngine.Item.LIZARD,
+		RuleEngine.Item.SPOCK,
+	]
+	for i: int in range(order.size()):
+		var item: RuleEngine.Item = order[i]
+		var token: ThrowToken = THROW_TOKEN_SCENE.instantiate() as ThrowToken
+		var home := Vector2(THROW_START_X + float(i) * THROW_SPACING, THROW_Y)
+		throw_tray.add_child(token)
+		token.scale = THROW_TOKEN_SCALE
+		token.setup(item, TEX_THROW[item] as Texture2D, home)
+		var drag: Draggable = token.get_node("Draggable") as Draggable
+		drag.drag_layer_parent = self
+		_throw_tokens.append(token)
+	_refresh_throw_tokens()
+
+
+func _return_throw_token(token: ThrowToken) -> void:
+	if not is_instance_valid(token):
+		return
+	if _enemy_drop_zone != null:
+		DropUtils.clear_occupant_reference(_enemy_drop_zone, token)
+	if token.get_parent() != throw_tray:
+		token.reparent(throw_tray)
+	token.return_home()
+
+
+func _park_throw_token_at_drop(token: ThrowToken) -> void:
+	if not is_instance_valid(token):
+		return
+	var drop_global: Vector2 = token.global_position
+	if _enemy_drop_zone != null:
+		DropUtils.clear_occupant_reference(_enemy_drop_zone, token)
+	if token.get_parent() != throw_tray:
+		token.reparent(throw_tray)
+	token.global_position = drop_global
+	var drag: Draggable = token.get_node_or_null("Draggable") as Draggable
+	if drag != null:
+		drag.next_position = drop_global
+		drag.previous_position = drop_global
+		drag.state = Draggable.DRAGGABLE_STATE.IDLE
+	token.set_throw_enabled(false)
+	_parked_throw_token = token
+
+
+func _clear_parked_throw_token() -> void:
+	if _parked_throw_token != null and is_instance_valid(_parked_throw_token):
+		_return_throw_token(_parked_throw_token)
+	_parked_throw_token = null
+
+
+func _refresh_throw_tokens() -> void:
+	for token: ThrowToken in _throw_tokens:
+		if not is_instance_valid(token):
+			continue
+		if token == _parked_throw_token:
+			token.set_throw_enabled(false)
+			continue
+		_return_throw_token(token)
+		var banned: bool = token.item in _round_bans
+		var can_throw: bool = (
+			_match_started_from_tutorial
+			and not _match_over
+			and not _resolving
+			and not _ai_thinking
+			and not player_1.has_thrown
+			and player_1.is_alive()
+			and not banned
+		)
+		token.set_throw_enabled(can_throw)
+
+
+func _on_enemy_throw_drop_applied(_zone: DropZone, area: Area2D, _plan: DropPlan) -> void:
+	var token: ThrowToken = area as ThrowToken
+	if token == null:
+		return
+	if _match_over or _resolving or _ai_thinking or player_1.has_thrown or not player_1.is_alive():
+		call_deferred("_return_throw_token", token)
+		return
+	if not player_1.is_item_allowed(token.item):
+		_set_status("BAN: %s" % player_1.item_name(token.item))
+		call_deferred("_return_throw_token", token)
+		return
+	if _parked_throw_token != null and _parked_throw_token != token:
+		_return_throw_token(_parked_throw_token)
+	# Mark before force_throw so refresh won't snap this token home.
+	_parked_throw_token = token
+	token.set_throw_enabled(false)
+	player_1.force_throw(token.item)
+	call_deferred("_finish_throw_token_drop", token)
+
+
+func _finish_throw_token_drop(token: ThrowToken) -> void:
+	_park_throw_token_at_drop(token)
+	_refresh_throw_tokens()
 
 func _start_match(tier: int, is_retry: bool) -> void:
 	_campaign.current_tier = clampi(tier, 0, _campaign.unlocked_tier)
@@ -195,11 +373,13 @@ func _start_match(tier: int, is_retry: bool) -> void:
 	_engine = RuleEngine.new()
 	_stats = MatchStats.new()
 	rules_overlay.bind(_engine, _stats)
+	side_beats.bind_engine(_engine)
 	_clear_hand()
 	_clear_played_cards()
+	_clear_enemy_throw_icons()
+	_clear_parked_throw_token()
 	_play_stack_count = 0
 	_ai_stack_count = 0
-	_discard_stack_count = 0
 	_p1_win_streak = 0
 	_p2_win_streak = 0
 	_tie_streak = 0
@@ -220,15 +400,15 @@ func _start_match(tier: int, is_retry: bool) -> void:
 	_match_over = false
 	_spawn_starting_hand()
 	_ai.prepare_round(_engine)
+	_refresh_throw_tokens()
 	var unlocked_hint := _campaign.name_for_tier(_campaign.unlocked_tier)
 	if is_retry:
-		_set_status("Реванш: %s. Выбери предмет или сыграй карту!" % _ai.get_display_name())
+		_set_status("Реванш: %s. Кинь предмет во врага или сыграй карту!" % _ai.get_display_name())
 	else:
 		_set_status(
-			"Бой против %s (открыто до: %s). Выбери предмет или сыграй карту!"
+			"Бой против %s (открыто до: %s). Кинь предмет во врага или сыграй карту!"
 			% [_ai.get_display_name(), unlocked_hint]
 		)
-
 
 func _apply_ai_portrait() -> void:
 	var is_mason: bool = _ai.persona == AiOpponent.Persona.MASON
@@ -286,9 +466,6 @@ func _clear_played_cards() -> void:
 	for child: Node in card_play_zone.get_children():
 		if child is RuleCard:
 			child.queue_free()
-	for child: Node in card_discard_zone.get_children():
-		if child is RuleCard:
-			child.queue_free()
 
 
 func _spawn_starting_hand() -> void:
@@ -316,6 +493,7 @@ func _draw_card(kind: RuleCard.Kind, relayout: bool = true) -> bool:
 		return false
 	var card: RuleCard = CARD_SCENE.instantiate() as RuleCard
 	card.kind = kind
+	card.idle_rounds = 0
 	card_hand.add_child(card)
 	var draggable: Draggable = card.get_node("Draggable") as Draggable
 	draggable.drag_layer_parent = self
@@ -344,10 +522,25 @@ func _grant_end_of_turn_cards(player_won: bool) -> void:
 	_layout_hand()
 
 
+func _age_and_auto_discard_hand() -> void:
+	var doomed: Array[RuleCard] = []
+	for card: RuleCard in _hand_cards():
+		card.idle_rounds += 1
+		if card.idle_rounds >= CARD_IDLE_DISCARD_ROUNDS:
+			doomed.append(card)
+	for card: RuleCard in doomed:
+		if is_instance_valid(card):
+			card_hand.remove_child(card)
+			card.free()
+	if not doomed.is_empty():
+		_layout_hand()
+
+
 func _clear_round_bans() -> void:
 	_round_bans.clear()
 	player_1.clear_banned_items()
 	player_2.clear_banned_items()
+	_refresh_throw_tokens()
 
 
 func _add_round_ban(item: RuleEngine.Item) -> void:
@@ -355,6 +548,7 @@ func _add_round_ban(item: RuleEngine.Item) -> void:
 		_round_bans.append(item)
 	player_1.set_banned_items(_round_bans)
 	player_2.set_banned_items(_round_bans)
+	_refresh_throw_tokens()
 
 
 func _layout_hand() -> void:
@@ -362,9 +556,16 @@ func _layout_hand() -> void:
 	var n: int = cards.size()
 	if n <= 0:
 		return
-	var start_x: float = HAND_CENTER_X - float(n - 1) * HAND_SPACING * 0.5
 	for i: int in range(n):
-		cards[i].position = Vector2(start_x + float(i) * HAND_SPACING, HAND_Y)
+		var card: RuleCard = cards[i]
+		card.scale = HAND_CARD_SCALE
+		card.position = Vector2(HAND_X, HAND_TOP_Y + float(i) * HAND_V_SPACING)
+		card.z_index = i + 1
+		var drag: Draggable = card.get_node_or_null("Draggable") as Draggable
+		if drag != null:
+			drag.next_position = card.global_position
+			drag.previous_position = card.global_position
+			drag.state = Draggable.DRAGGABLE_STATE.IDLE
 
 
 func _on_play_drop_applied(_zone: DropZone, area: Area2D, _plan: DropPlan) -> void:
@@ -383,6 +584,7 @@ func _on_play_drop_applied(_zone: DropZone, area: Area2D, _plan: DropPlan) -> vo
 	print(message)
 	_play_stack_count += 1
 	card.z_index = _play_stack_count
+	card.scale = Vector2.ONE
 	card.mark_resolved()
 	_layout_hand()
 	_settle_stacked_card(card, _play_stack_count - 1)
@@ -404,7 +606,6 @@ func _ai_play_card(kind: RuleCard.Kind) -> void:
 
 
 func _settle_stacked_card(card: RuleCard, stack_index: int) -> void:
-	await get_tree().create_timer(0.28).timeout
 	if not is_instance_valid(card):
 		return
 	card.position = PLAYER_STACK_OFFSET + STACK_STEP * float(stack_index)
@@ -415,47 +616,46 @@ func _settle_stacked_card(card: RuleCard, stack_index: int) -> void:
 		drag.state = Draggable.DRAGGABLE_STATE.IDLE
 
 
-func _on_discard_drop_accepted(_zone: DropZone, area: Area2D, _plan: DropPlan) -> void:
-	if _match_over:
+func _ensure_enemy_throw_icons() -> void:
+	_enemy_throw_icons = get_node_or_null("EnemyThrowIcons") as Node2D
+	if _enemy_throw_icons != null:
 		return
-	var card: RuleCard = area as RuleCard
-	if card == null or card.resolved:
-		return
-	card.mark_resolved()
-	_discard_stack_count += 1
-	# Under the bin sprite so the can covers them; still above the background.
-	card.z_as_relative = true
-	card.z_index = _discard_stack_count
-	card.modulate = Color.WHITE
-	_set_status("Карта сброшена (без эффекта)")
-	_layout_hand()
-	_settle_discarded_card(card, _discard_stack_count - 1)
-	if card_discard_zone.has_method("reset_visual"):
-		card_discard_zone.reset_visual()
+	_enemy_throw_icons = Node2D.new()
+	_enemy_throw_icons.name = "EnemyThrowIcons"
+	_enemy_throw_icons.z_index = 25
+	add_child(_enemy_throw_icons)
 
 
-func _settle_discarded_card(card: RuleCard, _stack_index: int) -> void:
-	await get_tree().create_timer(0.18).timeout
-	if not is_instance_valid(card):
+func _clear_enemy_throw_icons() -> void:
+	if _enemy_throw_icons == null:
 		return
-	if card.get_parent() != card_discard_zone:
-		var global_pos: Vector2 = card.global_position
-		card.reparent(card_discard_zone)
-		card.global_position = global_pos
-	card.scale = Vector2.ONE
-	card.position = DISCARD_STACK_OFFSET
-	var drag: Draggable = card.get_node_or_null("Draggable") as Draggable
-	if drag != null:
-		drag.next_position = card.global_position
-		drag.previous_position = card.global_position
-		drag.state = Draggable.DRAGGABLE_STATE.IDLE
+	for child: Node in _enemy_throw_icons.get_children():
+		child.queue_free()
+
+
+func _show_enemy_throw_icons(items: Array[RuleEngine.Item]) -> void:
+	_ensure_enemy_throw_icons()
+	_clear_enemy_throw_icons()
+	var n: int = items.size()
+	var start_x: float = ENEMY_THROW_ICON_POS.x - float(n - 1) * ENEMY_THROW_ICON_SPACING * 0.5
+	for i: int in range(n):
+		var icon := Sprite2D.new()
+		icon.texture = TEX_THROW[items[i]] as Texture2D
+		icon.scale = ENEMY_THROW_ICON_SCALE
+		icon.position = Vector2(
+			start_x + float(i) * ENEMY_THROW_ICON_SPACING,
+			ENEMY_THROW_ICON_POS.y
+		)
+		_enemy_throw_icons.add_child(icon)
 
 
 func _on_player_1_thrown(item: RuleEngine.Item) -> void:
 	if _match_over:
 		return
+	_clear_enemy_throw_icons()
 	_p1_item = item
 	_p1_ready = true
+	_refresh_throw_tokens()
 	_set_status("Ты: %s — %s думает..." % [player_1.item_name(item), _ai.get_display_name()])
 	_try_resolve()
 	_request_ai_throw()
@@ -463,9 +663,31 @@ func _on_player_1_thrown(item: RuleEngine.Item) -> void:
 
 func _on_player_2_thrown(item: RuleEngine.Item) -> void:
 	_p2_item = item
+	if _p2_items.is_empty():
+		_p2_items = [item]
 	_p2_ready = true
-	_set_status("%s: %s" % [_ai.get_display_name(), player_2.item_name(item)])
+	_show_enemy_throw_icons(_p2_items)
+	_set_status("%s: %s" % [_ai.get_display_name(), _format_ai_items()])
 	_try_resolve()
+
+
+func _format_ai_items() -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for item: RuleEngine.Item in _p2_items:
+		parts.append(player_2.item_name(item))
+	return " + ".join(parts)
+
+
+func _show_cheater_distraction(line: String) -> void:
+	_ensure_cheater_bubble()
+	cheater_bubble_label.text = line
+	cheater_bubble.visible = true
+	player_2.flash_smirk()
+
+
+func _hide_cheater_bubble() -> void:
+	if cheater_bubble != null:
+		cheater_bubble.visible = false
 
 
 func _request_ai_throw() -> void:
@@ -473,27 +695,39 @@ func _request_ai_throw() -> void:
 		return
 	_ai_thinking = true
 	player_2.choice_label.text = "%s думает..." % _ai.get_display_name()
-	await get_tree().create_timer(0.45).timeout
 	if _resolving or player_2.has_thrown or _match_over:
 		_ai_thinking = false
 		return
 	var ai_card: int = _ai.pick_card_for_round(_round_index)
 	if ai_card >= 0:
 		_ai_play_card(ai_card as RuleCard.Kind)
-		await get_tree().create_timer(1.0).timeout
 		if _resolving or player_2.has_thrown or _match_over:
 			_ai_thinking = false
 			return
-	var item: RuleEngine.Item = _ai.choose_item(_engine, _round_bans)
-	if not _ai.last_taunt.is_empty():
-		player_2.choice_label.text = _ai.last_taunt
-		_set_status("%s: «%s»" % [_ai.get_display_name(), _ai.last_taunt])
-		await get_tree().create_timer(1.1).timeout
-		if _resolving or player_2.has_thrown or _match_over:
+	var items: Array[RuleEngine.Item] = _ai.choose_items(_engine, _round_bans)
+	_p2_items = items
+	_p2_item = items[0]
+	if _ai.ignored_ban and not _ai.last_taunt.is_empty():
+		player_2.take_damage(1)
+		_show_cheater_distraction(_ai.last_taunt)
+		_set_status(
+			"%s: «%s» (−1 HP за игнор бана, осталось %d)"
+			% [_ai.get_display_name(), _ai.last_taunt, player_2.hp]
+		)
+		if _match_over:
 			_ai_thinking = false
 			return
-	player_2.pick(item)
-	player_2.throw_item()
+		if not player_2.is_alive():
+			_ai_thinking = false
+			_end_match()
+			return
+		if _resolving or player_2.has_thrown:
+			_ai_thinking = false
+			return
+	player_2.choice_label.text = "THROWN: %s" % _format_ai_items()
+	_show_enemy_throw_icons(_p2_items)
+	# Bypass Player.pick bans when Шулер ignores the prohibition.
+	player_2.force_throw(_p2_item)
 	_ai_thinking = false
 
 
@@ -501,99 +735,135 @@ func _try_resolve() -> void:
 	if _resolving or not _p1_ready or not _p2_ready or _match_over:
 		return
 	_resolving = true
-	var result: int = _engine.resolve(_p1_item, _p2_item)
-	_stats.record_round(_p1_item, _p2_item, result)
+	if _p2_items.is_empty():
+		_p2_items = [_p2_item]
+
 	var left: String = player_1.item_name(_p1_item)
-	var right: String = player_2.item_name(_p2_item)
+	var right: String = _format_ai_items()
 	var notes: PackedStringArray = PackedStringArray()
 
-	# Prediction bet resolves regardless of round outcome.
-	var predicted_right: bool = _prediction >= 0 and _prediction == (_p2_item as int)
+	# Prediction: correct if any AI item matches the bet.
+	var predicted_right: bool = false
+	if _prediction >= 0:
+		for ai_item: RuleEngine.Item in _p2_items:
+			if _prediction == (ai_item as int):
+				predicted_right = true
+				break
 	var predicted_wrong: bool = _prediction >= 0 and not predicted_right
 	_prediction = -1
 
+	for ai_item: RuleEngine.Item in _p2_items:
+		_stats.record_round(_p1_item, ai_item, _engine.resolve(_p1_item, ai_item))
+
+	var dual: Dictionary = CheaterDualResolve.evaluate(_engine, _p1_item, _p2_items)
+	var result: int = int(dual["result"])
+	var dmg_to_p1: int = int(dual["dmg_to_p1"])
+	var dmg_to_p2: int = int(dual["dmg_to_p2"])
+	var winning_p1_vs: Array[RuleEngine.Item] = []
+	var winning_p2_items: Array[RuleEngine.Item] = []
+	for v: Variant in dual["winning_p1_vs"] as Array:
+		winning_p1_vs.append(v as RuleEngine.Item)
+	for v: Variant in dual["winning_p2_items"] as Array:
+		winning_p2_items.append(v as RuleEngine.Item)
+
+	# Apply rock block on each winning hit (evaluate stores raw edge damage).
+	if result == 1:
+		dmg_to_p2 = 0
+		for beaten: RuleEngine.Item in winning_p1_vs:
+			var hit: int = _engine.get_damage(_p1_item, beaten)
+			hit = _apply_rock_block(beaten, hit, notes, player_2.item_name(beaten))
+			dmg_to_p2 += hit
+	elif result == -1:
+		dmg_to_p1 = 0
+		for winner_item: RuleEngine.Item in winning_p2_items:
+			var hit: int = _engine.get_damage(winner_item, _p1_item)
+			hit = _apply_rock_block(_p1_item, hit, notes, left)
+			dmg_to_p1 += hit
+
 	match result:
 		1:
-			var base: int = _engine.get_damage(_p1_item, _p2_item)
 			var bonus: int = _p1_win_streak
-			var dmg: int = base + bonus
+			dmg_to_p2 += bonus
 			if predicted_right:
-				dmg *= 2
+				dmg_to_p2 *= 2
 				notes.append("ставка ×2")
-			dmg = _apply_rock_block(_p2_item, dmg, notes, right)
-			player_2.take_damage(dmg)
-			_apply_win_perks(player_1, player_2, _p1_item, _p2_item, notes, true)
+			if _p2_items.size() > 1:
+				notes.append("против 2 предметов")
+			player_2.take_damage(dmg_to_p2)
+			for beaten: RuleEngine.Item in winning_p1_vs:
+				_apply_win_perks(player_1, player_2, _p1_item, beaten, notes, true)
 			_p1_win_streak += 1
 			_p2_win_streak = 0
 			_tie_streak = 0
 			_set_status(
 				"%s бьёт %s (−%d%s) — ты победил! %s: %d HP%s"
 				% [
-					left, right, dmg,
-					(" = %d+%d стрик" % [base, bonus]) if bonus > 0 else "",
+					left, right, dmg_to_p2,
+					(" +%d стрик" % bonus) if bonus > 0 else "",
 					_ai.get_display_name(), player_2.hp, _join_notes(notes),
 				]
 			)
 		-1:
-			var base: int = _engine.get_damage(_p2_item, _p1_item)
 			var bonus: int = _p2_win_streak
-			var dmg: int = base + bonus
-			dmg = _apply_rock_block(_p1_item, dmg, notes, left)
-			player_1.take_damage(dmg)
+			dmg_to_p1 += bonus
+			if _p2_items.size() > 1:
+				notes.append("двойной ход")
+			player_1.take_damage(dmg_to_p1)
 			player_2.flash_smirk()
-			_apply_win_perks(player_2, player_1, _p2_item, _p1_item, notes, false)
+			for winner_item: RuleEngine.Item in winning_p2_items:
+				_apply_win_perks(player_2, player_1, winner_item, _p1_item, notes, false)
 			_p2_win_streak += 1
 			_p1_win_streak = 0
 			_tie_streak = 0
 			_set_status(
 				"%s бьёт %s (−%d%s) — %s победил! Ты: %d HP%s"
 				% [
-					right, left, dmg,
-					(" = %d+%d стрик" % [base, bonus]) if bonus > 0 else "",
+					right, left, dmg_to_p1,
+					(" +%d стрик" % bonus) if bonus > 0 else "",
 					_ai.get_display_name(), player_1.hp, _join_notes(notes),
 				]
 			)
 		_:
+			# Overall tie (equal pair wins, or all ties): only tie damage, once.
 			_p1_win_streak = 0
 			_p2_win_streak = 0
 			_tie_streak += 1
 			var sudden: bool = _tie_streak >= 2
-			var top_bonus: int = 1 if sudden else 0
-			var mutual: bool = (
-				_p1_item != _p2_item
-				and _engine.has_beat(_p1_item, _p2_item)
-				and _engine.has_beat(_p2_item, _p1_item)
-			)
-			var dmg_to_p1: int = 1
-			var dmg_to_p2: int = 1
-			if mutual:
-				dmg_to_p2 = _engine.get_damage(_p1_item, _p2_item)
-				dmg_to_p1 = _engine.get_damage(_p2_item, _p1_item)
-			if predicted_right:
-				dmg_to_p2 *= 2
-				notes.append("ставка ×2")
-			dmg_to_p1 += top_bonus
-			dmg_to_p2 += top_bonus
-			# Spock on tie: −1 to self, +1 to enemy.
+			dmg_to_p1 = 1
+			dmg_to_p2 = 1
+			# Mutual arrows vs a single AI item → use that edge damage once.
+			if _p2_items.size() == 1:
+				var only: RuleEngine.Item = _p2_items[0]
+				if (
+					_p1_item != only
+					and _engine.has_beat(_p1_item, only)
+					and _engine.has_beat(only, _p1_item)
+				):
+					dmg_to_p2 = _engine.get_damage(_p1_item, only)
+					dmg_to_p1 = _engine.get_damage(only, _p1_item)
 			if _p1_item == RuleEngine.Item.SPOCK:
 				dmg_to_p1 = maxi(0, dmg_to_p1 - 1)
 				dmg_to_p2 += 1
 				notes.append("твой Спок: −1 себе, +1 врагу")
-			if _p2_item == RuleEngine.Item.SPOCK:
-				dmg_to_p2 = maxi(0, dmg_to_p2 - 1)
+			for ai_item: RuleEngine.Item in _p2_items:
+				if ai_item == RuleEngine.Item.SPOCK:
+					dmg_to_p2 = maxi(0, dmg_to_p2 - 1)
+					dmg_to_p1 += 1
+					notes.append("Спок врага: −1 ему, +1 тебе")
+					break
+			if sudden:
 				dmg_to_p1 += 1
-				notes.append("Спок врага: −1 ему, +1 тебе")
+				dmg_to_p2 += 1
+				notes.append("внезапная смерть +1")
+			if predicted_right:
+				dmg_to_p2 *= 2
+				notes.append("ставка ×2")
 			player_1.take_damage(dmg_to_p1)
 			player_2.take_damage(dmg_to_p2)
 			if sudden:
 				_set_status(
-					"ВНЕЗАПНАЯ СМЕРТЬ! Ничья ×%d — оба −%d/−%d (+1 сверху)%s"
+					"ВНЕЗАПНАЯ СМЕРТЬ! Ничья ×%d — оба −%d/−%d%s"
 					% [_tie_streak, dmg_to_p2, dmg_to_p1, _join_notes(notes)]
-				)
-			elif mutual:
-				_set_status(
-					"%s (−%d) и %s (−%d) бьют друг друга%s"
-					% [left, dmg_to_p2, right, dmg_to_p1, _join_notes(notes)]
 				)
 			else:
 				_set_status(
@@ -609,7 +879,7 @@ func _try_resolve() -> void:
 		"Round: %s vs %s -> %d | HP %d vs %d | streaks W%d/%d T%d"
 		% [left, right, result, player_1.hp, player_2.hp, _p1_win_streak, _p2_win_streak, _tie_streak]
 	)
-	await get_tree().create_timer(2.0).timeout
+	_hide_cheater_bubble()
 	if not player_1.is_alive() or not player_2.is_alive():
 		_end_match()
 		return
@@ -665,6 +935,7 @@ func _end_match() -> void:
 	player_1.input_enabled = false
 	_resolving = false
 	_ai_thinking = false
+	_refresh_throw_tokens()
 	if not player_1.is_alive() and not player_2.is_alive():
 		_campaign.retry_current()
 		_set_status("Оба без HP — ничья. R = реванш с %s" % _ai.get_display_name())
@@ -681,10 +952,9 @@ func _end_match() -> void:
 	var unlocked_new: bool = _campaign.on_player_won()
 	if unlocked_new:
 		_set_status(
-			"Победа над %s! Открыт: %s. Стартуем через миг..."
+			"Победа над %s! Открыт: %s. Стартуем..."
 			% [previous_name, _campaign.name_for_tier(_campaign.current_tier)]
 		)
-		await get_tree().create_timer(2.2).timeout
 		_start_match(_campaign.current_tier, false)
 	elif _campaign.current_tier >= AiCampaign.MAX_TIER:
 		_set_status("Победа над %s! Кампания пройдена. R = реванш" % previous_name)
@@ -693,7 +963,6 @@ func _end_match() -> void:
 			"Победа над %s! Дальше: %s. Стартуем..."
 			% [previous_name, _campaign.name_for_tier(_campaign.current_tier)]
 		)
-		await get_tree().create_timer(1.8).timeout
 		_start_match(_campaign.current_tier, false)
 
 
@@ -702,15 +971,19 @@ func _reset_round(player_won: bool = false) -> void:
 	_p2_ready = false
 	_resolving = false
 	_ai_thinking = false
+	_p2_items.clear()
+	_hide_cheater_bubble()
 	_clear_round_bans()
 	_round_index += 1
 	_prediction = -1
 	player_1.reset_round()
 	player_2.reset_round()
+	_age_and_auto_discard_hand()
 	_grant_end_of_turn_cards(player_won)
 	_ai.prepare_round(_engine)
+	_refresh_throw_tokens()
 	_set_status(
-		"Раунд %d vs %s — бросай или сыграй карту! (карт: %d/%d | стрик W %d/%d · ничьи %d)"
+		"Раунд %d vs %s — кинь предмет во врага или сыграй карту! (карт: %d/%d | стрик W %d/%d · ничьи %d)"
 		% [
 			_round_index + 1,
 			_ai.get_display_name(),

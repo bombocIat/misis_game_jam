@@ -172,6 +172,16 @@ func pick(item: RuleEngine.Item) -> bool:
 	return true
 
 
+## AI helper: commit a throw even if the item is banned this round.
+func force_throw(item: RuleEngine.Item) -> void:
+	if has_thrown or not is_alive():
+		return
+	selected_item = item
+	has_thrown = true
+	_refresh_choice_ui()
+	thrown.emit(item)
+
+
 func throw_item() -> void:
 	if has_thrown or not is_alive():
 		return
