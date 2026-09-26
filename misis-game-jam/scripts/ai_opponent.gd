@@ -36,6 +36,27 @@ const CHEATER_BLUFFS: Array[Dictionary] = [
 	{"line": "Вулканский разум подсказывает...", "play": RuleEngine.Item.SCISSORS},
 ]
 
+## Cards each persona may play (every AI_CARD_EVERY rounds).
+const PERSONA_CARDS: Dictionary = {
+	Persona.MASON: [
+		RuleCard.Kind.COOL_ROCK,
+		RuleCard.Kind.SANDSTORM,
+		RuleCard.Kind.EQUALIZER,
+	],
+	Persona.BOTANIST: [
+		RuleCard.Kind.DRAGON,
+		RuleCard.Kind.VULCAN,
+		RuleCard.Kind.MIND_MELD,
+		RuleCard.Kind.PAPER_PLANE,
+	],
+	Persona.CHEATER: [
+		RuleCard.Kind.WIND,
+		RuleCard.Kind.CHAOS,
+		RuleCard.Kind.HOMEWORK,
+	],
+}
+const AI_CARD_EVERY := 2
+
 var persona: Persona = Persona.MASON
 ## Last taunt line from Шулер (empty for others).
 var last_taunt: String = ""
@@ -55,6 +76,16 @@ func prepare_round(engine: RuleEngine) -> void:
 	_round_avoid.clear()
 	if persona == Persona.BOTANIST:
 		_round_avoid = _lowest_from_counts(_round_win_counts, 2)
+
+
+## Returns a card kind to play this round, or -1 if the AI passes.
+func pick_card_for_round(round_index: int) -> int:
+	if round_index <= 0 or round_index % AI_CARD_EVERY != 0:
+		return -1
+	var pool: Array = PERSONA_CARDS.get(persona, []) as Array
+	if pool.is_empty():
+		return -1
+	return int(pool[randi() % pool.size()])
 
 
 func choose_item(

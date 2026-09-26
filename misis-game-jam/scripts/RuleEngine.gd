@@ -133,6 +133,19 @@ func flip_random_arrow() -> bool:
 	return true
 
 
+## Remove one random outgoing arrow from `item`. Returns removed target or -1.
+func remove_random_beat_from(item: Item) -> int:
+	var targets: Array = get_beats(item)
+	if targets.is_empty():
+		return -1
+	var victim: Item = targets[randi() % targets.size()] as Item
+	targets.erase(victim)
+	beats[item] = targets
+	beat_power.erase(_edge_key(item, victim))
+	beats_changed.emit()
+	return victim as int
+
+
 func item_name(item: Item) -> String:
 	match item:
 		Item.ROCK:

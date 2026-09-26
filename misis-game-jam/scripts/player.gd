@@ -129,6 +129,14 @@ func is_alive() -> bool:
 	return hp > 0
 
 
+func heal(amount: int = 1) -> void:
+	if amount <= 0 or not is_alive():
+		return
+	hp = mini(MAX_HP, hp + amount)
+	_refresh_hp_ui()
+	hp_changed.emit(hp, MAX_HP)
+
+
 func take_damage(amount: int = 1) -> void:
 	if amount <= 0 or not is_alive():
 		return

@@ -8,6 +8,9 @@ const HAND_Y := 912.0
 const HAND_SPACING := 250.0
 const HAND_CENTER_X := 960.0
 const STACK_STEP := Vector2(14.0, -12.0)
+## Player's played pile sits left of the zone center, the AI's — right.
+const PLAYER_STACK_OFFSET := Vector2(-130.0, 0.0)
+const AI_STACK_OFFSET := Vector2(130.0, 0.0)
 
 @onready var player_1: Player = %Player1
 @onready var player_2: Player = %Player2
@@ -32,10 +35,25 @@ var _drop_zone: DropZone
 var _discard_drop_zone: DropZone
 var _match_over: bool = false
 var _play_stack_count: int = 0
+var _ai_stack_count: int = 0
 var _p1_win_streak: int = 0
 var _p2_win_streak: int = 0
 var _tie_streak: int = 0
 var _round_bans: Array[RuleEngine.Item] = []
+var _round_index: int = 0
+## Player's bet on the AI's item this round; -1 = none.
+var _prediction: int = -1
+## Set when the player wins with paper: one extra draw next hand refill.
+var _paper_bonus_draw: bool = false
+
+const BUY_CARD_COST := 1
+const PREDICTION_KEYS: Dictionary = {
+	KEY_6: RuleEngine.Item.ROCK,
+	KEY_7: RuleEngine.Item.SCISSORS,
+	KEY_8: RuleEngine.Item.PAPER,
+	KEY_9: RuleEngine.Item.LIZARD,
+	KEY_0: RuleEngine.Item.SPOCK,
+}
 
 
 func _ready() -> void:
@@ -67,6 +85,38 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif key == KEY_R and _match_over:
 		_start_match(_campaign.current_tier, true)
 		get_viewport().set_input_as_handled()
+	elif key == KEY_B and not _match_over:
+		_try_buy_card()
+		get_viewport().set_input_as_handled()
+	elif PREDICTION_KEYS.has(key) and not _match_over and not player_1.has_thrown:
+		_toggle_prediction(PREDICTION_KEYS[key] as RuleEngine.Item)
+		get_viewport().set_input_as_handled()
+
+
+func _toggle_prediction(item: RuleEngine.Item) -> void:
+	if _prediction == (item as int):
+		_prediction = -1
+		_set_status("Ставка снята")
+	else:
+		_prediction = item as int
+		_set_status(
+			"Ставка: %s кинет %s (угадал — ×2 урон, нет — −1 HP)"
+			% [_ai.get_display_name(), player_1.item_name(item)]
+		)
+
+
+func _try_buy_card() -> void:
+	if _resolving or player_1.has_thrown:
+		return
+	if _hand_count() >= MAX_HAND:
+		_set_status("Рука полна (%d/%d)" % [_hand_count(), MAX_HAND])
+		return
+	if player_1.hp <= BUY_CARD_COST:
+		_set_status("Слишком мало HP, чтобы купить карту")
+		return
+	player_1.take_damage(BUY_CARD_COST)
+	_draw_permanent_card(true)
+	_set_status("Куплена карта за %d HP (осталось %d)" % [BUY_CARD_COST, player_1.hp])
 
 
 func _ensure_drag_input() -> void:
@@ -112,9 +162,13 @@ func _start_match(tier: int, is_retry: bool) -> void:
 	_clear_hand()
 	_clear_played_cards()
 	_play_stack_count = 0
+	_ai_stack_count = 0
 	_p1_win_streak = 0
 	_p2_win_streak = 0
 	_tie_streak = 0
+	_round_index = 0
+	_prediction = -1
+	_paper_bonus_draw = false
 	_clear_round_bans()
 	player_1.reset_match(true)
 	player_2.reset_match(false)
@@ -195,6 +249,9 @@ func _grant_end_of_turn_cards(player_won: bool) -> void:
 	_draw_permanent_card(false)
 	if player_won:
 		_draw_ban_card(false)
+	if _paper_bonus_draw:
+		_paper_bonus_draw = false
+		_draw_permanent_card(false)
 	_layout_hand()
 
 
@@ -242,11 +299,26 @@ func _on_play_drop_applied(_zone: DropZone, area: Area2D, _plan: DropPlan) -> vo
 	_settle_stacked_card(card, _play_stack_count - 1)
 
 
+## AI plays a card: spawns it straight onto the play pile and applies it.
+func _ai_play_card(kind: RuleCard.Kind) -> void:
+	var card: RuleCard = CARD_SCENE.instantiate() as RuleCard
+	card.kind = kind
+	card_play_zone.add_child(card)
+	card.mark_resolved()
+	var message: String = card.apply_to(_engine)
+	_ai_stack_count += 1
+	card.z_index = _ai_stack_count
+	card.position = AI_STACK_OFFSET + STACK_STEP * float(_ai_stack_count - 1)
+	card.modulate = Color(1.0, 0.8, 0.8, 1.0)
+	_set_status("%s играет карту — %s" % [_ai.get_display_name(), message])
+	print("AI card: %s" % message)
+
+
 func _settle_stacked_card(card: RuleCard, stack_index: int) -> void:
 	await get_tree().create_timer(0.28).timeout
 	if not is_instance_valid(card):
 		return
-	card.position = STACK_STEP * float(stack_index)
+	card.position = PLAYER_STACK_OFFSET + STACK_STEP * float(stack_index)
 	var drag: Draggable = card.get_node_or_null("Draggable") as Draggable
 	if drag != null:
 		drag.next_position = card.global_position
@@ -297,6 +369,13 @@ func _request_ai_throw() -> void:
 	if _resolving or player_2.has_thrown or _match_over:
 		_ai_thinking = false
 		return
+	var ai_card: int = _ai.pick_card_for_round(_round_index)
+	if ai_card >= 0:
+		_ai_play_card(ai_card as RuleCard.Kind)
+		await get_tree().create_timer(1.0).timeout
+		if _resolving or player_2.has_thrown or _match_over:
+			_ai_thinking = false
+			return
 	var item: RuleEngine.Item = _ai.choose_item(_engine, _round_bans)
 	if not _ai.last_taunt.is_empty():
 		player_2.choice_label.text = _ai.last_taunt
@@ -318,77 +397,105 @@ func _try_resolve() -> void:
 	_stats.record_round(_p1_item, _p2_item, result)
 	var left: String = player_1.item_name(_p1_item)
 	var right: String = player_2.item_name(_p2_item)
+	var notes: PackedStringArray = PackedStringArray()
+
+	# Prediction bet resolves regardless of round outcome.
+	var predicted_right: bool = _prediction >= 0 and _prediction == (_p2_item as int)
+	var predicted_wrong: bool = _prediction >= 0 and not predicted_right
+	_prediction = -1
+
 	match result:
 		1:
 			var base: int = _engine.get_damage(_p1_item, _p2_item)
 			var bonus: int = _p1_win_streak
 			var dmg: int = base + bonus
+			if predicted_right:
+				dmg *= 2
+				notes.append("ставка ×2")
+			dmg = _apply_rock_block(_p2_item, dmg, notes, right)
 			player_2.take_damage(dmg)
+			_apply_win_perks(player_1, player_2, _p1_item, _p2_item, notes, true)
 			_p1_win_streak += 1
 			_p2_win_streak = 0
 			_tie_streak = 0
-			if bonus > 0:
-				_set_status(
-					"%s бьёт %s (−%d = %d+%d стрик)! Победа ×%d. %s: %d HP"
-					% [left, right, dmg, base, bonus, _p1_win_streak, _ai.get_display_name(), player_2.hp]
-				)
-			else:
-				_set_status(
-					"%s бьёт %s (−%d) — ты победил! %s: %d HP"
-					% [left, right, dmg, _ai.get_display_name(), player_2.hp]
-				)
+			_set_status(
+				"%s бьёт %s (−%d%s) — ты победил! %s: %d HP%s"
+				% [
+					left, right, dmg,
+					(" = %d+%d стрик" % [base, bonus]) if bonus > 0 else "",
+					_ai.get_display_name(), player_2.hp, _join_notes(notes),
+				]
+			)
 		-1:
 			var base: int = _engine.get_damage(_p2_item, _p1_item)
 			var bonus: int = _p2_win_streak
 			var dmg: int = base + bonus
+			dmg = _apply_rock_block(_p1_item, dmg, notes, left)
 			player_1.take_damage(dmg)
+			_apply_win_perks(player_2, player_1, _p2_item, _p1_item, notes, false)
 			_p2_win_streak += 1
 			_p1_win_streak = 0
 			_tie_streak = 0
-			if bonus > 0:
-				_set_status(
-					"%s бьёт %s (−%d = %d+%d стрик)! %s ×%d. Ты: %d HP"
-					% [right, left, dmg, base, bonus, _ai.get_display_name(), _p2_win_streak, player_1.hp]
-				)
-			else:
-				_set_status(
-					"%s бьёт %s (−%d) — %s победил! Ты: %d HP"
-					% [right, left, dmg, _ai.get_display_name(), player_1.hp]
-				)
+			_set_status(
+				"%s бьёт %s (−%d%s) — %s победил! Ты: %d HP%s"
+				% [
+					right, left, dmg,
+					(" = %d+%d стрик" % [base, bonus]) if bonus > 0 else "",
+					_ai.get_display_name(), player_1.hp, _join_notes(notes),
+				]
+			)
 		_:
 			_p1_win_streak = 0
 			_p2_win_streak = 0
 			_tie_streak += 1
 			var sudden: bool = _tie_streak >= 2
 			var top_bonus: int = 1 if sudden else 0
-			var dmg_to_p1: int = 1
-			var dmg_to_p2: int = 1
-			if (
+			var mutual: bool = (
 				_p1_item != _p2_item
 				and _engine.has_beat(_p1_item, _p2_item)
 				and _engine.has_beat(_p2_item, _p1_item)
-			):
+			)
+			var dmg_to_p1: int = 1
+			var dmg_to_p2: int = 1
+			if mutual:
 				dmg_to_p2 = _engine.get_damage(_p1_item, _p2_item)
 				dmg_to_p1 = _engine.get_damage(_p2_item, _p1_item)
+			if predicted_right:
+				dmg_to_p2 *= 2
+				notes.append("ставка ×2")
 			dmg_to_p1 += top_bonus
 			dmg_to_p2 += top_bonus
+			# Spock on tie: −1 to self, +1 to enemy.
+			if _p1_item == RuleEngine.Item.SPOCK:
+				dmg_to_p1 = maxi(0, dmg_to_p1 - 1)
+				dmg_to_p2 += 1
+				notes.append("твой Спок: −1 себе, +1 врагу")
+			if _p2_item == RuleEngine.Item.SPOCK:
+				dmg_to_p2 = maxi(0, dmg_to_p2 - 1)
+				dmg_to_p1 += 1
+				notes.append("Спок врага: −1 ему, +1 тебе")
 			player_1.take_damage(dmg_to_p1)
 			player_2.take_damage(dmg_to_p2)
 			if sudden:
 				_set_status(
-					"ВНЕЗАПНАЯ СМЕРТЬ! Ничья ×%d — оба −%d/−%d (+1 сверху)"
-					% [_tie_streak, dmg_to_p2, dmg_to_p1]
+					"ВНЕЗАПНАЯ СМЕРТЬ! Ничья ×%d — оба −%d/−%d (+1 сверху)%s"
+					% [_tie_streak, dmg_to_p2, dmg_to_p1, _join_notes(notes)]
 				)
-			elif (
-				_p1_item != _p2_item
-				and _engine.has_beat(_p1_item, _p2_item)
-				and _engine.has_beat(_p2_item, _p1_item)
-			):
+			elif mutual:
 				_set_status(
-					"%s (−%d) и %s (−%d) бьют друг друга" % [left, dmg_to_p2, right, dmg_to_p1]
+					"%s (−%d) и %s (−%d) бьют друг друга%s"
+					% [left, dmg_to_p2, right, dmg_to_p1, _join_notes(notes)]
 				)
 			else:
-				_set_status("%s vs %s — ничья, оба −%d HP" % [left, right, dmg_to_p1])
+				_set_status(
+					"%s vs %s — ничья, −%d тебе / −%d врагу%s"
+					% [left, right, dmg_to_p1, dmg_to_p2, _join_notes(notes)]
+				)
+
+	if predicted_wrong:
+		player_1.take_damage(1)
+		status_label.text += "  | ставка не сыграла: −1 HP"
+
 	print(
 		"Round: %s vs %s -> %d | HP %d vs %d | streaks W%d/%d T%d"
 		% [left, right, result, player_1.hp, player_2.hp, _p1_win_streak, _p2_win_streak, _tie_streak]
@@ -398,6 +505,50 @@ func _try_resolve() -> void:
 		_end_match()
 		return
 	_reset_round(result == 1)
+
+
+## Rock: on loss blocks 1 damage, but never below 1.
+func _apply_rock_block(
+	loser_item: RuleEngine.Item, dmg: int, notes: PackedStringArray, loser_name: String
+) -> int:
+	if loser_item == RuleEngine.Item.ROCK and dmg > 1:
+		notes.append("%s блокирует 1" % loser_name)
+		return dmg - 1
+	return dmg
+
+
+## Winner perks: Lizard heals, Scissors cut an enemy arrow, Paper draws (player only).
+func _apply_win_perks(
+	winner: Player,
+	_loser: Player,
+	winner_item: RuleEngine.Item,
+	loser_item: RuleEngine.Item,
+	notes: PackedStringArray,
+	winner_is_player: bool
+) -> void:
+	match winner_item:
+		RuleEngine.Item.LIZARD:
+			winner.heal(1)
+			notes.append("ящерица лечит +1")
+		RuleEngine.Item.SCISSORS:
+			var cut: int = _engine.remove_random_beat_from(loser_item)
+			if cut >= 0:
+				notes.append(
+					"ножницы срезали стрелку %s→%s"
+					% [_engine.item_name(loser_item), _engine.item_name(cut as RuleEngine.Item)]
+				)
+		RuleEngine.Item.PAPER:
+			if winner_is_player:
+				_paper_bonus_draw = true
+				notes.append("бумага: +1 карта")
+		_:
+			pass
+
+
+func _join_notes(notes: PackedStringArray) -> String:
+	if notes.is_empty():
+		return ""
+	return "  [" + " · ".join(notes) + "]"
 
 
 func _end_match() -> void:
@@ -443,13 +594,16 @@ func _reset_round(player_won: bool = false) -> void:
 	_resolving = false
 	_ai_thinking = false
 	_clear_round_bans()
+	_round_index += 1
+	_prediction = -1
 	player_1.reset_round()
 	player_2.reset_round()
 	_grant_end_of_turn_cards(player_won)
 	_ai.prepare_round(_engine)
 	_set_status(
-		"Следующий раунд vs %s — бросай или сыграй карту! (карт: %d/%d | стрик W %d/%d · ничьи %d)"
+		"Раунд %d vs %s — бросай или сыграй карту! (карт: %d/%d | стрик W %d/%d · ничьи %d)"
 		% [
+			_round_index + 1,
 			_ai.get_display_name(),
 			_hand_count(),
 			MAX_HAND,
